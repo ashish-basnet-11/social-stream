@@ -12,22 +12,54 @@ datasource db {
 
 // 1. User Model
 model User {
-  // ... (User fields)
-  id    Int     @id @default(autoincrement()) 
-  email String  @unique 
-  name  String? 
-  posts Post[] 
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  // Relationship fields:
+  posts     Post[]
+  comments  Comment[] 
+  likes     Like[]
 }
 
 // 2. Post Model
 model Post {
-  // ... (Post fields)
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   title     String
-  content   String? @db.Text 
-  published Boolean @default(true) 
-  createdAt DateTime @default(now()) 
+  content   String?  @db.Text
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
 
-  author    User    @relation(fields: [authorId], references: [id]) 
-  authorId  Int 
+  // Relationship fields:
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  comments  Comment[]
+  likes     Like[]
+}
+
+// 3. Comment Model (One-to-Many)
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  // Foreign Keys
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+}
+
+// 4. Like Model (Join table for Many-to-Many relationship between User and Post)
+model Like {
+  createdAt DateTime @default(now())
+
+  // Composite Key: ensures a user can only like a post once
+  userId Int
+  postId Int
+  @@id([userId, postId])
+
+  // Foreign Keys
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
 }
