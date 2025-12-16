@@ -7,12 +7,14 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      // Loading screen uses the dark background and teal spinner
+      <div className="min-h-screen flex items-center justify-center bg-gray-900" style={{ backgroundImage: 'radial-gradient(at 0% 0%, #2a3854 0%, #171923 100%)' }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400"></div>
       </div>
     );
   }
 
+  // ... Logic REMAINS ...
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }

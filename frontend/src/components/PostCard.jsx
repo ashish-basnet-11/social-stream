@@ -76,25 +76,28 @@ const PostCard = ({ post, onDelete, onUpdate }) => {
 
   if (isEditing) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
+      // REVAMP: Edit mode card uses glass style
+      <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-xl p-6">
         <form onSubmit={handleUpdate} className="space-y-4">
           <input
             type="text"
             value={editData.title}
             onChange={(e) => setEditData({ ...editData, title: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            // Input style matching auth pages
+            className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 sm:text-sm transition duration-150 shadow-inner"
           />
           <textarea
             value={editData.content}
             onChange={(e) => setEditData({ ...editData, content: e.target.value })}
             rows="3"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            // Input style matching auth pages
+            className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 sm:text-sm transition duration-150 shadow-inner resize-none"
           />
           <div className="flex gap-2">
-            <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            <button type="submit" className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 font-medium transition duration-150">
               Save
             </button>
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-medium transition duration-150">
               Cancel
             </button>
           </div>
@@ -103,56 +106,63 @@ const PostCard = ({ post, onDelete, onUpdate }) => {
     );
   }
 
+  // RENDER VIEW MODE
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    // REVAMP: View mode card uses glass style
+    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-xl p-6">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-xl font-semibold">{post.title}</h3>
-          <p className="text-sm text-gray-500">by {post.author.name}</p>
+          <h3 className="text-2xl font-bold text-white mb-1">{post.title}</h3>
+          <p className="text-sm text-gray-400">by <span className="font-medium text-teal-400">{post.author.name}</span></p>
         </div>
         {isAuthor && (
-          <div className="flex gap-2">
-            <button onClick={() => setIsEditing(true)} className="text-blue-600 hover:text-blue-800 text-sm">
+          <div className="flex gap-3">
+            <button onClick={() => setIsEditing(true)} className="text-sm font-medium text-teal-400 hover:text-teal-300 transition duration-150">
               Edit
             </button>
-            <button onClick={handleDelete} className="text-red-600 hover:text-red-800 text-sm">
+            <button onClick={handleDelete} className="text-sm font-medium text-red-500 hover:text-red-400 transition duration-150">
               Delete
             </button>
           </div>
         )}
       </div>
 
-      <p className="text-gray-700 mb-4">{post.content}</p>
+      <p className="text-gray-300 mb-4 whitespace-pre-wrap">{post.content}</p>
 
-      <div className="flex items-center gap-4 text-sm text-gray-600 border-t pt-4">
-        <button onClick={handleLike} className={`flex items-center gap-1 ${isLiked ? 'text-red-600' : 'hover:text-red-600'}`}>
+      {/* Action bar and divider */}
+      <div className="flex items-center gap-6 text-base text-gray-400 border-t border-white/10 pt-4">
+        {/* Like Button */}
+        <button onClick={handleLike} className={`flex items-center gap-1 font-medium transition duration-150 ${isLiked ? 'text-red-400' : 'hover:text-red-400'}`}>
           <span>{isLiked ? '❤️' : '🤍'}</span>
-          <span>{likesCount}</span>
+          <span>{likesCount} Likes</span>
         </button>
         
-        <button onClick={loadComments} className="flex items-center gap-1 hover:text-blue-600">
+        {/* Comment Button */}
+        <button onClick={loadComments} className="flex items-center gap-1 hover:text-teal-400 font-medium transition duration-150">
           <span>💬</span>
-          <span>{commentsCount}</span>
+          <span>{commentsCount} Comments</span>
         </button>
       </div>
 
       {showComments && (
-        <div className="mt-4 border-t pt-4">
+        <div className="mt-4 border-t border-white/10 pt-4">
           <form onSubmit={handleCommentSubmit} className="mb-4">
             <input
               type="text"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Write a comment..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              // Input style matching glassmorphism inputs
+              className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-800/50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 sm:text-sm transition duration-150"
             />
           </form>
 
           <div className="space-y-3">
             {comments.map((comment) => (
-              <div key={comment.id} className="bg-gray-50 p-3 rounded-md">
-                <p className="text-sm font-semibold">{comment.author.name}</p>
-                <p className="text-sm text-gray-700">{comment.content}</p>
+              // Comment bubble style
+              <div key={comment.id} className="bg-gray-800/70 p-3 rounded-lg border border-gray-700/50">
+                <p className="text-xs font-semibold text-teal-400">{comment.author.name}</p>
+                <p className="text-sm text-gray-200">{comment.content}</p>
               </div>
             ))}
           </div>
