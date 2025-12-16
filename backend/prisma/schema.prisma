@@ -14,7 +14,8 @@ datasource db {
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
-  name      String?
+  password  String  
+  name      String
   // Relationship fields:
   posts     Post[]
   comments  Comment[] 

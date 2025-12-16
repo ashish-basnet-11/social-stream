@@ -1,20 +1,25 @@
-import express from 'express'
+import express, { urlencoded } from 'express'
 import { config } from 'dotenv'
 import { connectDB, disconnectDB } from './config/db.js';
 
 
 //import routes
 import postsRoutes from './routes/postsRoutes.js'
+import authRoutes from './routes/authRoutes.js'
 
 config();
 connectDB();
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
 
 
 // API Routes
 
 app.use("/posts", postsRoutes)
+app.use("/auth", authRoutes)
+
 
 const PORT = 5001
 
