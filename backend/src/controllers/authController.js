@@ -28,7 +28,7 @@ const register = async (req, res) => {
         }
     })
 
-    const token = generateToken(user.id);
+    const token = generateToken(user.id, res);
 
 
     res.status(201).json({
@@ -66,7 +66,7 @@ const login = async (req, res) => {
             .json({ error: "Incorrect email or password" })
     }
 
-    const token = generateToken(user.id);
+    const token = generateToken(user.id, res);
 
     res.status(201).json({
         status: "success",
@@ -80,4 +80,15 @@ const login = async (req, res) => {
     })
 
 }
-export { register, login };
+
+const logout = async(req, res) => {
+    res.cookie("jwt", "", {
+        httpOnly: true,
+        expires: new Date(0),
+    })
+    res.status(200).json({
+        status: "success",
+        message: "Logout successfull"
+    })
+}
+export { register, login, logout };
