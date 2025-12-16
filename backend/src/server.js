@@ -1,6 +1,7 @@
 import express, { urlencoded } from 'express'
 import { config } from 'dotenv'
 import { connectDB, disconnectDB } from './config/db.js';
+import cookieParser from 'cookie-parser';
 
 
 //import routes
@@ -13,6 +14,7 @@ connectDB();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(cookieParser());
 
 
 // API Routes
