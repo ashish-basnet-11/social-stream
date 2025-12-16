@@ -1,7 +1,7 @@
 // prisma/schema.prisma
 
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "library" // Good for Node.js environments
 }
 
@@ -12,14 +12,14 @@ datasource db {
 
 // 1. User Model
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String  
-  name      String
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  password String
+  name     String
   // Relationship fields:
-  posts     Post[]
-  comments  Comment[] 
-  likes     Like[]
+  posts    Post[]
+  comments Comment[]
+  likes    Like[]
 }
 
 // 2. Post Model
@@ -31,36 +31,36 @@ model Post {
   createdAt DateTime @default(now())
 
   // Relationship fields:
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  comments  Comment[]
-  likes     Like[]
+  author   User      @relation(fields: [authorId], references: [id])
+  authorId Int
+  comments Comment[]
+  likes    Like[]
 }
 
 // 3. Comment Model (One-to-Many)
+// Comment Model
 model Comment {
   id        Int      @id @default(autoincrement())
   content   String   @db.Text
   createdAt DateTime @default(now())
 
-  // Foreign Keys
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-
-  post      Post     @relation(fields: [postId], references: [id])
-  postId    Int
+  // Foreign Keys with CASCADE
+  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId Int
+  post     Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId   Int
 }
 
-// 4. Like Model (Join table for Many-to-Many relationship between User and Post)
+// Like Model
 model Like {
   createdAt DateTime @default(now())
 
-  // Composite Key: ensures a user can only like a post once
   userId Int
   postId Int
-  @@id([userId, postId])
 
-  // Foreign Keys
-  user User @relation(fields: [userId], references: [id])
-  post Post @relation(fields: [postId], references: [id])
+  // Foreign Keys with CASCADE
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
 }
