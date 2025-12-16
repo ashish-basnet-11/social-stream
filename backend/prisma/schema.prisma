@@ -1,0 +1,33 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library" // Good for Node.js environments
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL") // <--- REQUIRED for Prisma 6.x
+}
+
+// 1. User Model
+model User {
+  // ... (User fields)
+  id    Int     @id @default(autoincrement()) 
+  email String  @unique 
+  name  String? 
+  posts Post[] 
+}
+
+// 2. Post Model
+model Post {
+  // ... (Post fields)
+  id        Int     @id @default(autoincrement())
+  title     String
+  content   String? @db.Text 
+  published Boolean @default(true) 
+  createdAt DateTime @default(now()) 
+
+  author    User    @relation(fields: [authorId], references: [id]) 
+  authorId  Int 
+}
