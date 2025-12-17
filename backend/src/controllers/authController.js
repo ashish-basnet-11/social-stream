@@ -1,11 +1,18 @@
+// backend/src/controllers/authController.js
 import { prisma } from "../config/db.js";
 import bcrypt from 'bcryptjs';
 import generateToken from "../utils/generateToken.js";
-import { registerSchema, loginSchema } from "../validators/authValidators.js"; // Add this import
+import { registerSchema, loginSchema } from "../validators/authValidators.js";
+import { sendVerificationEmail } from "../utils/emailService.js";
+import { z } from 'zod';
+
+// Generate 6-digit verification code
+const generateVerificationCode = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 const register = async (req, res) => {
     try {
-        // Validate input with Zod
         const validatedData = registerSchema.parse(req.body);
         const { name, email, password } = validatedData;
 
@@ -21,30 +28,44 @@ const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Create user
+        // Generate verification code
+        const verificationCode = generateVerificationCode();
+        const verificationExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        // Create user (unverified)
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
-                password: hashedPassword
+                password: hashedPassword,
+                isVerified: false,
+                verificationCode,
+                verificationExpiry,
             }
-        })
+        });
 
-        const token = generateToken(user.id, res);
+        // Send verification email
+        try {
+            await sendVerificationEmail(email, verificationCode);
+        } catch (emailError) {
+            console.error("Email sending failed:", emailError);
+            // Delete user if email fails
+            await prisma.user.delete({ where: { id: user.id } });
+            return res.status(500).json({ 
+                error: "Failed to send verification email. Please try again." 
+            });
+        }
 
         res.status(201).json({
             status: "success",
+            message: "Registration successful! Please check your email for verification code.",
             data: {
-                user: {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email
-                },
-                token,
+                userId: user.id,
+                email: user.email,
+                requiresVerification: true
             }
-        })
+        });
     } catch (error) {
-        // Handle Zod validation errors
         if (error instanceof z.ZodError) {
             return res.status(400).json({ 
                 error: "Validation failed",
@@ -58,44 +79,158 @@ const register = async (req, res) => {
         console.error("Registration error:", error);
         res.status(500).json({ error: "Server error during registration" });
     }
-}
+};
+
+const verifyEmail = async (req, res) => {
+    try {
+        const { email, code } = req.body;
+
+        if (!email || !code) {
+            return res.status(400).json({ error: "Email and code are required" });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { email }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        if (user.isVerified) {
+            return res.status(400).json({ error: "Email already verified" });
+        }
+
+        // Check if code matches and hasn't expired
+        if (user.verificationCode !== code) {
+            return res.status(400).json({ error: "Invalid verification code" });
+        }
+
+        if (new Date() > user.verificationExpiry) {
+            return res.status(400).json({ error: "Verification code has expired" });
+        }
+
+        // Verify user
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                isVerified: true,
+                verificationCode: null,
+                verificationExpiry: null,
+            }
+        });
+
+        // Generate token and log them in
+        const token = generateToken(user.id, res);
+
+        res.status(200).json({
+            status: "success",
+            message: "Email verified successfully",
+            data: {
+                user: {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    isVerified: true
+                },
+                token
+            }
+        });
+    } catch (error) {
+        console.error("Verification error:", error);
+        res.status(500).json({ error: "Server error during verification" });
+    }
+};
+
+const resendVerificationCode = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: "Email is required" });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { email }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        if (user.isVerified) {
+            return res.status(400).json({ error: "Email already verified" });
+        }
+
+        // Generate new code
+        const verificationCode = generateVerificationCode();
+        const verificationExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                verificationCode,
+                verificationExpiry,
+            }
+        });
+
+        // Send email
+        await sendVerificationEmail(email, verificationCode);
+
+        res.status(200).json({
+            status: "success",
+            message: "Verification code resent successfully"
+        });
+    } catch (error) {
+        console.error("Resend code error:", error);
+        res.status(500).json({ error: "Failed to resend verification code" });
+    }
+};
 
 const login = async (req, res) => {
     try {
-        // Validate input with Zod
         const validatedData = loginSchema.parse(req.body);
         const { email, password } = validatedData;
 
-        // Check if the user email exists
         const user = await prisma.user.findUnique({
             where: { email }
-        })
+        });
 
         if (!user) {
-            return res.status(400).json({ error: "Incorrect email or password" })
+            return res.status(400).json({ error: "Incorrect email or password" });
+        }
+
+        // Check if user is verified
+        if (!user.isVerified) {
+            return res.status(403).json({ 
+                error: "Email not verified. Please verify your email first.",
+                requiresVerification: true,
+                email: user.email
+            });
         }
 
         // Verify password
-        const isPasswordValid = await bcrypt.compare(password, user.password)
+        const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
-            return res.status(400).json({ error: "Incorrect email or password" })
+            return res.status(400).json({ error: "Incorrect email or password" });
         }
 
         const token = generateToken(user.id, res);
 
-        res.status(201).json({
+        res.status(200).json({
             status: "success",
             data: {
                 user: {
                     id: user.id,
-                    email: user.email
+                    name: user.name,
+                    email: user.email,
+                    isVerified: user.isVerified
                 },
                 token,
             }
-        })
+        });
     } catch (error) {
-        // Handle Zod validation errors
         if (error instanceof z.ZodError) {
             return res.status(400).json({ 
                 error: "Validation failed",
@@ -109,25 +244,25 @@ const login = async (req, res) => {
         console.error("Login error:", error);
         res.status(500).json({ error: "Server error during login" });
     }
-}
+};
 
 const logout = async (req, res) => {
     res.cookie("jwt", "", {
         httpOnly: true,
         expires: new Date(0),
-    })
+    });
     res.status(200).json({
         status: "success",
         message: "Logout successful"
-    })
-}
+    });
+};
 
 const getMe = async (req, res) => {
     try {
         res.status(200).json({
             status: "success",
             data: { 
-                user: req.user // Already set by protect middleware
+                user: req.user
             }
         });
     } catch (error) {
@@ -136,5 +271,4 @@ const getMe = async (req, res) => {
     }
 };
 
-// Update export
-export { register, login, logout, getMe };
+export { register, login, logout, getMe, verifyEmail, resendVerificationCode };
