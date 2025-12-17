@@ -1,28 +1,42 @@
 // prisma/schema.prisma
-
 generator client {
-  provider   = "prisma-client-js"
-  engineType = "library" // Good for Node.js environments
+  provider = "prisma-client-js"
+  engineType = "library"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL") // <--- REQUIRED for Prisma 6.x
+  url      = env("DATABASE_URL")
 }
 
-// 1. User Model
+// User Model with Email Verification
+// User Model with Email Verification
 model User {
-  id       Int       @id @default(autoincrement())
-  email    String    @unique
-  password String
-  name     String
-  // Relationship fields:
-  posts    Post[]
-  comments Comment[]
-  likes    Like[]
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String  
+  name      String
+  
+  // Email verification fields
+  isVerified           Boolean   @default(false)
+  verificationCode     String?
+  verificationExpiry   DateTime?
+  
+  // OAuth fields
+  provider             String?   @default("local")
+  providerId           String?
+  
+  // Timestamps
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @default(now()) @updatedAt  // Add @default(now())
+  
+  // Relationship fields
+  posts     Post[]
+  comments  Comment[] 
+  likes     Like[]
 }
 
-// 2. Post Model
+// Post Model
 model Post {
   id        Int      @id @default(autoincrement())
   title     String
@@ -30,25 +44,22 @@ model Post {
   published Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  // Relationship fields:
-  author   User      @relation(fields: [authorId], references: [id])
-  authorId Int
-  comments Comment[]
-  likes    Like[]
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  Int
+  comments  Comment[]
+  likes     Like[]
 }
 
-// 3. Comment Model (One-to-Many)
 // Comment Model
 model Comment {
   id        Int      @id @default(autoincrement())
   content   String   @db.Text
   createdAt DateTime @default(now())
 
-  // Foreign Keys with CASCADE
-  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId Int
-  post     Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId   Int
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    Int
 }
 
 // Like Model
@@ -58,9 +69,8 @@ model Like {
   userId Int
   postId Int
 
-  // Foreign Keys with CASCADE
+  @@id([userId, postId])
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-
-  @@id([userId, postId])
 }

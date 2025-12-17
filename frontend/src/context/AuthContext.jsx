@@ -37,6 +37,16 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const response = await authAPI.register(userData);
+      
+      // Check if verification is required
+      if (response.data.data.requiresVerification) {
+        return { 
+          success: true, 
+          requiresVerification: true,
+          email: response.data.data.email 
+        };
+      }
+      
       setUser(response.data.data.user);
       return { success: true };
     } catch (error) {
@@ -54,8 +64,13 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       const errorMsg = error.response?.data?.error || 'Login failed';
+      const requiresVerification = error.response?.data?.requiresVerification || false;
       setError(errorMsg);
-      return { success: false, error: errorMsg };
+      return { 
+        success: false, 
+        error: errorMsg,
+        requiresVerification 
+      };
     }
   };
 

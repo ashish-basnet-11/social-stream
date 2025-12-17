@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 const generateToken = (userId, res) => {
-    const payload = { userId: userId }  // ✅ Fix the typo here
+    const payload = { userId: userId }
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN || "7d",
     })
