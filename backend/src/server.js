@@ -3,56 +3,78 @@ import { config } from 'dotenv';
 import { connectDB, disconnectDB } from './config/db.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import rateLimit from 'express-rate-limit'; // ADD THIS LINE
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import session from 'express-session';
+import passport from './config/passport.js';
 
 // Import routes
 import postsRoutes from './routes/postsRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import oauthRoutes from './routes/oauthRoutes.js';
 import likeRoutes from './routes/likeRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
-import helmet from 'helmet'; // Add at top with other imports
 
 config();
 connectDB();
 
 const app = express();
 
-// Middleware
+// Security middleware
+app.use(helmet());
+
+// CORS configuration
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true
 }));
+
+// Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(helmet());
 
-// ADD RATE LIMITERS HERE (BEFORE YOUR ROUTES)
-// General API rate limiter
+// Session configuration (required for OAuth)
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Rate limiters
 const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // 100 requests per 15 minutes per IP
+    windowMs: 15 * 60 * 1000,
+    max: 100,
     message: "Too many requests from this IP, please try again later",
     standardHeaders: true,
     legacyHeaders: false,
 });
 
-// Stricter rate limiter for auth routes
 const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // Only 5 requests per 15 minutes
+    windowMs: 15 * 60 * 1000,
+    max: 5,
     message: "Too many login/register attempts, please try again later",
     standardHeaders: true,
     legacyHeaders: false,
 });
 
 // Apply rate limiters
-app.use("/api/", apiLimiter); // General limit for all API routes
-app.use("/api/auth/login", authLimiter); // Stricter limit for login
-app.use("/api/auth/register", authLimiter); // Stricter limit for register
+app.use("/api/", apiLimiter);
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
 
-// API Routes (KEEP THESE AS THEY WERE)
+// API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/auth", oauthRoutes); // OAuth routes
 app.use("/api/posts", postsRoutes);
 app.use("/api/likes", likeRoutes);
 app.use("/api/comments", commentRoutes);

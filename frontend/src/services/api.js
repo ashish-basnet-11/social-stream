@@ -17,6 +17,12 @@ export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
   logout: () => api.post('/auth/logout'),
   getMe: () => api.get('/auth/me'),
+  verifyEmail: (email, code) => api.post('/auth/verify-email', { email, code }),
+  resendCode: (email) => api.post('/auth/resend-code', { email }),
+  // OAuth
+  googleLogin: () => window.location.href = `${API_URL}/auth/google`,
+  getOAuthUser: () => api.get('/auth/oauth/user'),
+  checkAuth: () => api.get('/auth/check'),
 };
 
 // Posts endpoints
