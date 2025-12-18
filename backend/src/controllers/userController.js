@@ -52,14 +52,13 @@ const getMyProfile = async (req, res) => {
 const updateMyProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { name, bio, avatar } = req.body;
+        const { name, bio } = req.body;
 
         const updatedUser = await prisma.user.update({
             where: { id: userId },
             data: {
                 ...(name && { name }),
-                ...(bio !== undefined && { bio }),
-                ...(avatar && { avatar })
+                ...(bio !== undefined && { bio })
             },
             select: {
                 id: true,
@@ -81,15 +80,45 @@ const updateMyProfile = async (req, res) => {
     }
 };
 
-// Get any user's profile by ID
+// Upload avatar
+const uploadAvatar = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        if (!req.file) {
+            return res.status(400).json({ error: "No image file provided" });
+        }
+
+        const avatarUrl = req.file.path; // Cloudinary URL
+
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: { avatar: avatarUrl },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                bio: true,
+                avatar: true
+            }
+        });
+
+        res.status(200).json({
+            status: "success",
+            message: "Avatar uploaded successfully",
+            data: { user: updatedUser }
+        });
+    } catch (error) {
+        console.error("Upload avatar error:", error);
+        res.status(500).json({ error: "Failed to upload avatar" });
+    }
+};
+
 // Get any user's profile by ID
 const getUserProfile = async (req, res) => {
     try {
         const { userId } = req.params;
         const currentUserId = req.user?.id;
-
-        console.log('Fetching profile for userId:', userId);
-        console.log('Current user ID:', currentUserId);
 
         const user = await prisma.user.findUnique({
             where: { id: parseInt(userId) },
@@ -117,42 +146,38 @@ const getUserProfile = async (req, res) => {
         let friendsCount = 0;
 
         if (currentUserId) {
-            try {
-                // Check friendship status
-                const friendRequest = await prisma.friendRequest.findFirst({
-                    where: {
-                        OR: [
-                            { senderId: currentUserId, receiverId: parseInt(userId) },
-                            { senderId: parseInt(userId), receiverId: currentUserId }
-                        ]
-                    }
-                });
-
-                if (friendRequest) {
-                    if (friendRequest.status === 'accepted') {
-                        friendshipStatus = 'friends';
-                    } else if (friendRequest.senderId === currentUserId) {
-                        friendshipStatus = 'request_sent';
-                    } else {
-                        friendshipStatus = 'request_received';
-                    }
-                } else {
-                    friendshipStatus = 'none';
+            // Check friendship status
+            const friendRequest = await prisma.friendRequest.findFirst({
+                where: {
+                    OR: [
+                        { senderId: currentUserId, receiverId: parseInt(userId) },
+                        { senderId: parseInt(userId), receiverId: currentUserId }
+                    ]
                 }
+            });
 
-                // Count friends
-                friendsCount = await prisma.friendRequest.count({
-                    where: {
-                        OR: [
-                            { senderId: parseInt(userId), status: 'accepted' },
-                            { receiverId: parseInt(userId), status: 'accepted' }
-                        ]
-                    }
-                });
-            } catch (friendError) {
-                console.error('Friend query error:', friendError);
-                // Continue without friend data
+            if (friendRequest) {
+                if (friendRequest.status === 'accepted') {
+                    friendshipStatus = 'friends';
+                } else if (friendRequest.senderId === currentUserId) {
+                    friendshipStatus = 'request_sent';
+                } else {
+                    friendshipStatus = 'request_received';
+                }
+            } else {
+                friendshipStatus = 'none';
             }
+
+            // Count friends
+            const friendsCountData = await prisma.friendRequest.count({
+                where: {
+                    OR: [
+                        { senderId: parseInt(userId), status: 'accepted' },
+                        { receiverId: parseInt(userId), status: 'accepted' }
+                    ]
+                }
+            });
+            friendsCount = friendsCountData;
         }
 
         res.status(200).json({
@@ -169,11 +194,7 @@ const getUserProfile = async (req, res) => {
         });
     } catch (error) {
         console.error("Get user profile error:", error);
-        console.error("Error details:", error.message);
-        res.status(500).json({ 
-            error: "Failed to fetch user profile",
-            details: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
+        res.status(500).json({ error: "Failed to fetch user profile" });
     }
 };
 
@@ -192,11 +213,11 @@ const searchUsers = async (req, res) => {
         const users = await prisma.user.findMany({
             where: {
                 AND: [
-                    { id: { not: currentUserId } },
+                    { id: { not: currentUserId } }, // Exclude current user
                     {
                         OR: [
-                            { name: { contains: query } },  // Remove mode
-                            { email: { contains: query } }  // Remove mode
+                            { name: { contains: query, mode: 'insensitive' } },
+                            { email: { contains: query, mode: 'insensitive' } }
                         ]
                     }
                 ]
@@ -223,7 +244,8 @@ const searchUsers = async (req, res) => {
 
 export { 
     getMyProfile, 
-    updateMyProfile, 
+    updateMyProfile,
+    uploadAvatar,
     getUserProfile, 
     searchUsers 
 };

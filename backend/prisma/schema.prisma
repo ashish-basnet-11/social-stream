@@ -58,8 +58,8 @@ model FriendRequest {
 // Post Model
 model Post {
   id        Int      @id @default(autoincrement())
-  title     String
-  content   String?  @db.Text
+  caption   String?  @db.Text  // Changed from title to caption
+  imageUrl  String?  
   published Boolean  @default(true)
   createdAt DateTime @default(now())
 

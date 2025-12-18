@@ -1,5 +1,6 @@
 import express from 'express';
 import { protect, optionalAuth } from '../middleware/authMiddleware.js';
+import { upload } from '../config/cloudinary.js';
 import { 
     createPost, 
     getAllPosts, 
@@ -12,13 +13,13 @@ import {
 const router = express.Router();
 
 // Public routes (anyone can view)
-router.get("/", optionalAuth, getAllPosts);           // Get all posts (feed)
-router.get("/:id", optionalAuth, getPostById);        // Get single post
-router.get("/user/:userId", getUserPosts);            // Get posts by user
+router.get("/", optionalAuth, getAllPosts);           
+router.get("/:id", optionalAuth, getPostById);        
+router.get("/user/:userId", getUserPosts);            
 
 // Protected routes (requires authentication)
-router.post("/", protect, createPost);                // Create post
-router.put("/:id", protect, updatePost);              // Update post
-router.delete("/:id", protect, deletePost);           // Delete post
+router.post("/", protect, upload.single('image'), createPost);  // Add upload middleware
+router.put("/:id", protect, updatePost);              
+router.delete("/:id", protect, deletePost);           
 
 export default router;

@@ -3,20 +3,21 @@ import { prisma } from "../config/db.js";
 // Create a new post
 const createPost = async (req, res) => {
     try {
-        const { title, content } = req.body;
-        const userId = req.user.id; // From auth middleware
+        const { caption } = req.body;
+        const userId = req.user.id;
+        const imageUrl = req.file ? req.file.path : null; // Cloudinary URL
 
-        // Validate input
-        if (!title || !content) {
+        // At least caption or image is required
+        if (!caption && !imageUrl) {
             return res.status(400).json({ 
-                error: "Title and content are required" 
+                error: "Caption or image is required" 
             });
         }
 
         const post = await prisma.post.create({
             data: {
-                title,
-                content,
+                caption,
+                imageUrl,
                 authorId: userId
             },
             include: {
@@ -24,7 +25,8 @@ const createPost = async (req, res) => {
                     select: {
                         id: true,
                         name: true,
-                        email: true
+                        email: true,
+                        avatar: true
                     }
                 }
             }
@@ -194,7 +196,7 @@ const getPostById = async (req, res) => {
 const updatePost = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, content } = req.body;
+        const { caption } = req.body;
         const userId = req.user.id;
 
         // Check if post exists and user is the author
@@ -215,15 +217,15 @@ const updatePost = async (req, res) => {
         const updatedPost = await prisma.post.update({
             where: { id: parseInt(id) },
             data: {
-                ...(title && { title }),
-                ...(content && { content })
+                ...(caption !== undefined && { caption })
             },
             include: {
                 author: {
                     select: {
                         id: true,
                         name: true,
-                        email: true
+                        email: true,
+                        avatar: true
                     }
                 }
             }
