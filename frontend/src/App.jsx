@@ -7,6 +7,8 @@ import Register from './pages/Register';
 import VerifyEmail from './pages/VerifyEmail';
 import OAuthSuccess from './pages/OAuthSuccess';
 import Home from './pages/Home';
+import Profile from './pages/Profile';
+import Friends from './pages/Friends';
 
 function App() {
   return (
@@ -22,6 +24,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/:userId"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/friends"
+            element={
+              <ProtectedRoute>
+                <Friends />
               </ProtectedRoute>
             }
           />

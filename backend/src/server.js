@@ -14,6 +14,8 @@ import authRoutes from './routes/authRoutes.js';
 import oauthRoutes from './routes/oauthRoutes.js';
 import likeRoutes from './routes/likeRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import friendRoutes from './routes/friendRoutes.js';
 
 config();
 connectDB();
@@ -75,6 +77,8 @@ app.use("/api/auth/register", authLimiter);
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/auth", oauthRoutes); // OAuth routes
+app.use("/api/users", userRoutes);
+app.use("/api/friends", friendRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/likes", likeRoutes);
 app.use("/api/comments", commentRoutes);

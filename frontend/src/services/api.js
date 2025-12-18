@@ -49,4 +49,23 @@ export const commentsAPI = {
   delete: (id) => api.delete(`/comments/${id}`),
 };
 
+// Users endpoints
+export const usersAPI = {
+  getMyProfile: () => api.get('/users/me'),
+  updateMyProfile: (data) => api.put('/users/me', data),
+  getUserProfile: (userId) => api.get(`/users/${userId}`),
+  searchUsers: (query) => api.get(`/users/search?query=${query}`),
+};
+
+// Friends endpoints
+export const friendsAPI = {
+  sendRequest: (receiverId) => api.post('/friends/request', { receiverId }),
+  acceptRequest: (requestId) => api.put(`/friends/request/${requestId}/accept`),
+  rejectRequest: (requestId) => api.put(`/friends/request/${requestId}/reject`),
+  cancelRequest: (requestId) => api.delete(`/friends/request/${requestId}`),
+  removeFriend: (friendId) => api.delete(`/friends/${friendId}`),
+  getPendingRequests: () => api.get('/friends/requests/pending'),
+  getFriends: () => api.get('/friends'),
+};
+
 export default api;
