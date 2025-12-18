@@ -6,7 +6,10 @@ import { useAuth } from '../context/AuthContext';
 const PostCard = ({ post, onDelete, onUpdate }) => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({ title: post.title, content: post.content });
+  // Using post.caption as the primary content now
+  const [editData, setEditData] = useState({
+    caption: post.caption || post.content || ''
+  });
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState(post.comments || []);
   const [newComment, setNewComment] = useState('');
@@ -76,22 +79,14 @@ const PostCard = ({ post, onDelete, onUpdate }) => {
 
   if (isEditing) {
     return (
-      // REVAMP: Edit mode card uses glass style
       <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-xl p-6">
         <form onSubmit={handleUpdate} className="space-y-4">
-          <input
-            type="text"
-            value={editData.title}
-            onChange={(e) => setEditData({ ...editData, title: e.target.value })}
-            // Input style matching auth pages
-            className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 sm:text-sm transition duration-150 shadow-inner"
-          />
           <textarea
-            value={editData.content}
-            onChange={(e) => setEditData({ ...editData, content: e.target.value })}
+            value={editData.caption}
+            onChange={(e) => setEditData({ ...editData, caption: e.target.value })}
             rows="3"
-            // Input style matching auth pages
             className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 sm:text-sm transition duration-150 shadow-inner resize-none"
+            placeholder="Edit your caption..."
           />
           <div className="flex gap-2">
             <button type="submit" className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 font-medium transition duration-150">
@@ -106,68 +101,84 @@ const PostCard = ({ post, onDelete, onUpdate }) => {
     );
   }
 
-  // RENDER VIEW MODE
   return (
-    // REVAMP: View mode card uses glass style
-    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-xl p-6">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-2xl font-bold text-white mb-1">{post.title}</h3>
-          <p className="text-sm text-gray-400">by <span className="font-medium text-teal-400">{post.author.name}</span></p>
+    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-xl overflow-hidden mb-6">
+      {/* Author Header */}
+      <div className="p-4 flex justify-between items-center border-b border-white/10">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold">
+            {post.author.name[0].toUpperCase()}
+          </div>
+          <div>
+            <p className="font-medium text-white">{post.author.name}</p>
+            <p className="text-xs text-gray-400">{new Date(post.createdAt).toLocaleDateString()}</p>
+          </div>
         </div>
         {isAuthor && (
           <div className="flex gap-3">
-            <button onClick={() => setIsEditing(true)} className="text-sm font-medium text-teal-400 hover:text-teal-300 transition duration-150">
-              Edit
-            </button>
-            <button onClick={handleDelete} className="text-sm font-medium text-red-500 hover:text-red-400 transition duration-150">
-              Delete
-            </button>
+            <button onClick={() => setIsEditing(true)} className="text-sm font-medium text-teal-400 hover:text-teal-300">Edit</button>
+            <button onClick={handleDelete} className="text-sm font-medium text-red-500 hover:text-red-400">Delete</button>
           </div>
         )}
       </div>
 
-      <p className="text-gray-300 mb-4 whitespace-pre-wrap">{post.content}</p>
-
-      {/* Action bar and divider */}
-      <div className="flex items-center gap-6 text-base text-gray-400 border-t border-white/10 pt-4">
-        {/* Like Button */}
-        <button onClick={handleLike} className={`flex items-center gap-1 font-medium transition duration-150 ${isLiked ? 'text-red-400' : 'hover:text-red-400'}`}>
-          <span>{isLiked ? '❤️' : '🤍'}</span>
-          <span>{likesCount} Likes</span>
-        </button>
-        
-        {/* Comment Button */}
-        <button onClick={loadComments} className="flex items-center gap-1 hover:text-teal-400 font-medium transition duration-150">
-          <span>💬</span>
-          <span>{commentsCount} Comments</span>
-        </button>
-      </div>
-
-      {showComments && (
-        <div className="mt-4 border-t border-white/10 pt-4">
-          <form onSubmit={handleCommentSubmit} className="mb-4">
-            <input
-              type="text"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Write a comment..."
-              // Input style matching glassmorphism inputs
-              className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-800/50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 sm:text-sm transition duration-150"
-            />
-          </form>
-
-          <div className="space-y-3">
-            {comments.map((comment) => (
-              // Comment bubble style
-              <div key={comment.id} className="bg-gray-800/70 p-3 rounded-lg border border-gray-700/50">
-                <p className="text-xs font-semibold text-teal-400">{comment.author.name}</p>
-                <p className="text-sm text-gray-200">{comment.content}</p>
-              </div>
-            ))}
-          </div>
+      {/* Post Image Section */}
+      {post.imageUrl && (
+        <div className="w-full bg-black/20 border-b border-white/5">
+          <img
+            src={post.imageUrl}
+            alt="Post content"
+            className="w-full h-auto max-h-[600px] object-contain mx-auto"
+            // Added onError to handle broken Cloudinary links
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
         </div>
       )}
+
+      {/* Post Content/Caption */}
+      <div className="p-4">
+        {post.caption && (
+          <p className="text-gray-200 whitespace-pre-wrap text-base mb-4">
+            {post.caption}
+          </p>
+        )}
+        {/* Action Bar */}
+        <div className="flex items-center gap-6 text-base text-gray-400 border-t border-white/10 pt-4">
+          <button onClick={handleLike} className={`flex items-center gap-1 font-medium transition ${isLiked ? 'text-red-400' : 'hover:text-red-400'}`}>
+            <span>{isLiked ? '❤️' : '🤍'}</span>
+            <span>{likesCount}</span>
+          </button>
+
+          <button onClick={loadComments} className="flex items-center gap-1 hover:text-teal-400 font-medium transition">
+            <span>💬</span>
+            <span>{commentsCount}</span>
+          </button>
+        </div>
+
+        {/* Comments Section */}
+        {showComments && (
+          <div className="mt-4 space-y-4">
+            <form onSubmit={handleCommentSubmit}>
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment..."
+                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-800/50 text-white placeholder-gray-500 focus:ring-2 focus:ring-teal-400"
+              />
+            </form>
+
+            <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+              {comments.map((comment) => (
+                <div key={comment.id} className="bg-gray-800/70 p-3 rounded-lg border border-gray-700/50">
+                  <p className="text-xs font-semibold text-teal-400">{comment.author.name}</p>
+                  <p className="text-sm text-gray-200">{comment.content}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

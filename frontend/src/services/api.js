@@ -30,7 +30,9 @@ export const postsAPI = {
   getAll: (page = 1, limit = 10) => api.get(`/posts?page=${page}&limit=${limit}`),
   getById: (id) => api.get(`/posts/${id}`),
   getUserPosts: (userId, page = 1) => api.get(`/posts/user/${userId}?page=${page}`),
-  create: (postData) => api.post('/posts', postData),
+  create: (formData) => api.post('/posts', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
   update: (id, postData) => api.put(`/posts/${id}`, postData),
   delete: (id) => api.delete(`/posts/${id}`),
 };
@@ -53,6 +55,9 @@ export const commentsAPI = {
 export const usersAPI = {
   getMyProfile: () => api.get('/users/me'),
   updateMyProfile: (data) => api.put('/users/me', data),
+  uploadAvatar: (formData) => api.post('/users/me/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
   getUserProfile: (userId) => api.get(`/users/${userId}`),
   searchUsers: (query) => api.get(`/users/search?query=${query}`),
 };
