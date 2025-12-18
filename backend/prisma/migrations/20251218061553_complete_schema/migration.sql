@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE `User` ADD COLUMN `avatar` VARCHAR(191) NULL,
+    ADD COLUMN `bio` TEXT NULL,
+    ALTER COLUMN `updatedAt` DROP DEFAULT;

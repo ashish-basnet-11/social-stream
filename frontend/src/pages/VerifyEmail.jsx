@@ -11,7 +11,7 @@ const VerifyEmail = () => {
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
@@ -68,8 +68,12 @@ const VerifyEmail = () => {
           <p className="mt-2 text-center text-sm text-gray-600">
             We sent a 6-digit code to <strong>{email}</strong>
           </p>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            if the email exists please check your inbox
+
+          </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
             <div className="rounded-md bg-red-50 p-4">
@@ -82,7 +86,7 @@ const VerifyEmail = () => {
               <p className="text-sm text-green-800">{successMessage}</p>
             </div>
           )}
-          
+
           <div>
             <label htmlFor="code" className="sr-only">Verification Code</label>
             <input

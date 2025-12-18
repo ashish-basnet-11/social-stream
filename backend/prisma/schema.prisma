@@ -10,12 +10,13 @@ datasource db {
 }
 
 // User Model with Email Verification
-// User Model with Email Verification
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
-  password  String?  // Make password optional for OAuth users
+  password  String?  
   name      String
+  bio       String?  @db.Text    // <- THIS MUST BE HERE
+  avatar    String?              // <- THIS MUST BE HERE
   
   // Email verification fields
   isVerified           Boolean   @default(false)
@@ -23,17 +24,35 @@ model User {
   verificationExpiry   DateTime?
   
   // OAuth fields
-  provider             String?   @default("local")
+  provider             String?   @default("local") // "local", "google", "github"
   providerId           String?
   
   // Timestamps
   createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @default(now()) @updatedAt
-  
+  updatedAt            DateTime  @updatedAt
+
   // Relationship fields
   posts     Post[]
   comments  Comment[] 
   likes     Like[]
+
+  sentFriendRequests     FriendRequest[] @relation("SentRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
+}
+model FriendRequest {
+  id        Int      @id @default(autoincrement())
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  senderId  Int
+  sender    User     @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  receiverId Int
+  receiver   User     @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId, status])
 }
 
 // Post Model
