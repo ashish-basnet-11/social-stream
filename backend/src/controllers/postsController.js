@@ -59,7 +59,8 @@ const getAllPosts = async (req, res) => {
                     select: {
                         id: true,
                         name: true,
-                        email: true
+                        email: true,
+                        avatar: true,
                     }
                 },
                 likes: {
@@ -277,6 +278,7 @@ const deletePost = async (req, res) => {
 };
 
 // Get posts by specific user
+// Get posts by specific user
 const getUserPosts = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -295,7 +297,14 @@ const getUserPosts = async (req, res) => {
                     select: {
                         id: true,
                         name: true,
-                        email: true
+                        email: true,
+                        avatar: true // Added avatar for profile feed consistency
+                    }
+                },
+                // Added likes to check if current user liked them
+                likes: {
+                    select: {
+                        userId: true
                     }
                 },
                 _count: {
@@ -307,6 +316,17 @@ const getUserPosts = async (req, res) => {
             }
         });
 
+        // Mapping the data so the frontend receives the expected format
+        const postsWithLikeStatus = posts.map(post => ({
+            ...post,
+            // Check if the person viewing the profile has liked these posts
+            isLikedByUser: post.likes?.some(like => like.userId === req.user?.id) || false,
+            likesCount: post._count.likes || 0,
+            commentsCount: post._count.comments || 0,
+            likes: undefined, // Cleanup
+            _count: undefined // Cleanup
+        }));
+
         const totalPosts = await prisma.post.count({
             where: { authorId: parseInt(userId) }
         });
@@ -314,7 +334,7 @@ const getUserPosts = async (req, res) => {
         res.status(200).json({
             status: "success",
             data: {
-                posts,
+                posts: postsWithLikeStatus, // Send the flattened posts
                 pagination: {
                     currentPage: parseInt(page),
                     totalPages: Math.ceil(totalPosts / limit),

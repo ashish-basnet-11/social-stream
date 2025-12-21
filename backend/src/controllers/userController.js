@@ -216,8 +216,8 @@ const searchUsers = async (req, res) => {
                     { id: { not: currentUserId } }, // Exclude current user
                     {
                         OR: [
-                            { name: { contains: query, mode: 'insensitive' } },
-                            { email: { contains: query, mode: 'insensitive' } }
+                            { name: { contains: query} }, //, mode: 'insensitive' 
+                            { email: { contains: query} } //, mode: 'insensitive' 
                         ]
                     }
                 ]

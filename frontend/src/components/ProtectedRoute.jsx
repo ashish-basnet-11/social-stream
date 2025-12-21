@@ -1,25 +1,29 @@
-// src/components/ProtectedRoute.jsx
-import { Navigate } from 'react-router-dom';
+// src/components/ProtectedLayout.jsx
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Layout from './Layout';
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedLayout = () => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return (
-      // Loading screen uses the dark background and teal spinner
-      <div className="min-h-screen flex items-center justify-center bg-gray-900" style={{ backgroundImage: 'radial-gradient(at 0% 0%, #2a3854 0%, #171923 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400"></div>
       </div>
     );
   }
 
-  // ... Logic REMAINS ...
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  // If authenticated, wrap everything in the Global Layout
+  return (
+    <Layout>
+      <Outlet /> 
+    </Layout>
+  );
 };
 
-export default ProtectedRoute;
+export default ProtectedLayout;

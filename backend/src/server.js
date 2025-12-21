@@ -52,10 +52,12 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+const isDev = process.env.NODE_ENV === 'development';
+
 // Rate limiters
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: isDev ? 1000 : 100,
     message: "Too many requests from this IP, please try again later",
     standardHeaders: true,
     legacyHeaders: false,
@@ -63,7 +65,7 @@ const apiLimiter = rateLimit({
 
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5,
+    max: isDev ? 100 : 5,
     message: "Too many login/register attempts, please try again later",
     standardHeaders: true,
     legacyHeaders: false,
