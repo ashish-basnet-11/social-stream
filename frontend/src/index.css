@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+/* Custom Utility to hide scrollbars */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
+@keyframes toast-in {
+  from { transform: translateY(100%) scale(0.9); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.animate-toast { animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1); }

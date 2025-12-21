@@ -2,8 +2,14 @@
 import { prisma } from "../config/db.js";
 import bcrypt from 'bcryptjs';
 import generateToken from "../utils/generateToken.js";
-import { registerSchema, loginSchema } from "../validators/authValidators.js";
-import { sendVerificationEmail } from "../utils/emailService.js";
+import {
+    registerSchema,
+    loginSchema,
+    forgotPasswordSchema, // <-- Make sure this is here
+    resetPasswordSchema    // <-- Make sure this is here
+}
+    from "../validators/authValidators.js";
+import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/emailService.js";
 import { z } from 'zod';
 
 // Generate 6-digit verification code
@@ -51,8 +57,8 @@ const register = async (req, res) => {
             console.error("Email sending failed:", emailError);
             // Delete user if email fails
             await prisma.user.delete({ where: { id: user.id } });
-            return res.status(500).json({ 
-                error: "Failed to send verification email. Please try again." 
+            return res.status(500).json({
+                error: "Failed to send verification email. Please try again."
             });
         }
 
@@ -67,7 +73,7 @@ const register = async (req, res) => {
         });
     } catch (error) {
         if (error instanceof z.ZodError) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: "Validation failed",
                 details: error.errors.map(e => ({
                     field: e.path[0],
@@ -75,7 +81,7 @@ const register = async (req, res) => {
                 }))
             });
         }
-        
+
         console.error("Registration error:", error);
         res.status(500).json({ error: "Server error during registration" });
     }
@@ -202,7 +208,7 @@ const login = async (req, res) => {
 
         // Check if user is verified
         if (!user.isVerified) {
-            return res.status(403).json({ 
+            return res.status(403).json({
                 error: "Email not verified. Please verify your email first.",
                 requiresVerification: true,
                 email: user.email
@@ -232,7 +238,7 @@ const login = async (req, res) => {
         });
     } catch (error) {
         if (error instanceof z.ZodError) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: "Validation failed",
                 details: error.errors.map(e => ({
                     field: e.path[0],
@@ -240,7 +246,7 @@ const login = async (req, res) => {
                 }))
             });
         }
-        
+
         console.error("Login error:", error);
         res.status(500).json({ error: "Server error during login" });
     }
@@ -261,7 +267,7 @@ const getMe = async (req, res) => {
     try {
         res.status(200).json({
             status: "success",
-            data: { 
+            data: {
                 user: req.user
             }
         });
@@ -271,4 +277,74 @@ const getMe = async (req, res) => {
     }
 };
 
-export { register, login, logout, getMe, verifyEmail, resendVerificationCode };
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = forgotPasswordSchema.parse(req.body);
+
+        const user = await prisma.user.findUnique({ where: { email } });
+
+        // For security, don't reveal if a user exists or not
+        if (!user) {
+            return res.status(200).json({
+                status: "success",
+                message: "If an account exists with that email, a reset code has been sent."
+            });
+        }
+
+        const resetCode = generateVerificationCode();
+        const resetExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                verificationCode: resetCode, // Reusing these fields or create specific ones in Schema
+                verificationExpiry: resetExpiry,
+            }
+        });
+
+        await sendPasswordResetEmail(email, resetCode);
+
+        res.status(200).json({
+            status: "success",
+            message: "Reset code sent to your email."
+        });
+    } catch (error) {
+        console.error("Forgot password error:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const { email, code, newPassword } = resetPasswordSchema.parse(req.body);
+
+        const user = await prisma.user.findUnique({ where: { email } });
+
+        if (!user || user.verificationCode !== code || new Date() > user.verificationExpiry) {
+            return res.status(400).json({ error: "Invalid or expired reset code" });
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                verificationCode: null,
+                verificationExpiry: null,
+            }
+        });
+
+        res.status(200).json({
+            status: "success",
+            message: "Password reset successful! You can now log in."
+        });
+    } catch (error) {
+        console.error("Reset password error:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+export { register, login, logout, getMe, verifyEmail, resendVerificationCode, resetPassword, forgotPassword };

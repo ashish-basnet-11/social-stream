@@ -6,7 +6,9 @@ import {
     logout, 
     getMe, 
     verifyEmail, 
-    resendVerificationCode 
+    resendVerificationCode, 
+    forgotPassword,
+    resetPassword
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -18,5 +20,7 @@ router.post("/resend-code", resendVerificationCode);
 router.post("/login", login);
 router.post("/logout", logout);
 router.get("/me", protect, getMe);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 export default router;
