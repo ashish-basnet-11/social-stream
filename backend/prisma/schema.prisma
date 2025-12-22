@@ -15,8 +15,9 @@ model User {
   email     String   @unique
   password  String?  
   name      String
-  bio       String?  @db.Text    // <- THIS MUST BE HERE
-  avatar    String?              // <- THIS MUST BE HERE
+  bio       String?  @db.Text    
+  avatar    String?              
+  showEmail        Boolean  @default(false)
   
   // Email verification fields
   isVerified           Boolean   @default(false)

@@ -14,7 +14,10 @@ import {
   X,
   Settings,
   ArrowLeft,
-  Maximize2
+  Maximize2,
+  Mail, // Added for the email badge
+  ShieldCheck,
+  ShieldOff
 } from 'lucide-react';
 
 const Profile = () => {
@@ -37,13 +40,13 @@ const Profile = () => {
   useEffect(() => {
     fetchProfile();
     fetchUserPosts();
-  }, [userId]);
+  }, [userId, currentUser]); // Re-fetch if currentUser changes (e.g., privacy toggle)
 
   const fetchProfile = async () => {
     try {
       const response = await usersAPI.getUserProfile(userId);
       const userData = response.data.data.user;
-      setProfile(userData); // This now includes the 'mutualFriends' array
+      setProfile(userData);
     } catch (err) {
       setError('Profile not found');
     } finally {
@@ -92,7 +95,7 @@ const Profile = () => {
     <main className="min-h-screen bg-[#F8FAFC] text-slate-900 pt-12 pb-20">
       <div className="max-w-[935px] mx-auto px-6">
 
-        {/* Profile Header - Restored Tilted Square Design */}
+        {/* Profile Header */}
         <header className="flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-16 mb-16">
           <div className="relative group">
             <div
@@ -152,13 +155,41 @@ const Profile = () => {
               </div>
             </div>
 
-            <div className="max-w-md space-y-4">
+            <div className="max-w-md space-y-5">
               <p className="text-[15px] leading-relaxed text-slate-500 font-medium">
                 {profile?.bio || (isOwnProfile ? "Tell the world your story..." : "This user prefers to keep their story a mystery.")}
               </p>
 
-              {/* MUTUAL FRIENDS - Styled for Studio Design */}
-              {/* MUTUAL FRIENDS - Styled for Studio Design */}
+              {/* CONTACT SECTION (Email Badge) */}
+              {profile?.email && (
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                  <div className="flex items-center gap-3 px-4 py-2 bg-white border border-slate-200 rounded-2xl shadow-sm group hover:border-indigo-200 transition-all">
+                    <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-indigo-600 group-hover:bg-indigo-50 transition-colors">
+                      <Mail size={16} />
+                    </div>
+                    <div className="text-left">
+                      <span className="block text-[9px] uppercase font-black tracking-[0.15em] text-slate-400 leading-none mb-1">Email Address</span>
+                      <span className="text-xs font-bold text-slate-700">{profile.email}</span>
+                    </div>
+                  </div>
+
+                  {/* Privacy Status - Visible only to owner */}
+                  {isOwnProfile && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl border border-slate-200/60">
+                      {profile.showEmail ? (
+                        <ShieldCheck size={14} className="text-emerald-500" />
+                      ) : (
+                        <ShieldOff size={14} className="text-slate-400" />
+                      )}
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                        {profile.showEmail ? 'Public' : 'Private'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* MUTUAL FRIENDS */}
               {!isOwnProfile && profile?.mutualFriends?.length > 0 && (
                 <div className="flex items-center justify-center md:justify-start gap-3 pt-2">
                   <div className="flex -space-x-2.5">
@@ -173,7 +204,7 @@ const Profile = () => {
                     ))}
                   </div>
 
-                  <p className="text-[12px] text-slate-400 font-bold uppercase tracking-tight">
+                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tight">
                     Friends with{' '}
                     <span
                       onClick={() => navigate(`/profile/${profile.mutualFriends[0].id}`)}
@@ -182,10 +213,7 @@ const Profile = () => {
                       {profile.mutualFriends[0].name}
                     </span>
                     {profile.mutualFriends.length > 1 && (
-                      <span
-                        onClick={() => navigate(`/profile/${profile.mutualFriends[1].id}`)} // Or open a modal here
-                        className="cursor-pointer hover:text-slate-600 transition-colors"
-                      >
+                      <span className="text-slate-400">
                         {` +${profile.mutualFriends.length - 1} more`}
                       </span>
                     )}
@@ -196,7 +224,7 @@ const Profile = () => {
           </div>
         </header>
 
-        {/* Zoomed Avatar Overlay - Restored Square Style */}
+        {/* Zoomed Avatar Overlay */}
         {isAvatarOpen && profile?.avatar && (
           <div
             className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4 animate-in fade-in duration-200"

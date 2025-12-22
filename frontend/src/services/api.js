@@ -78,4 +78,10 @@ export const friendsAPI = {
   getPendingRequests: () => api.get('/friends/requests/pending'),
   getFriends: () => api.get('/friends'),
 };
+
+export const settingsAPI = {
+  getSettings: () => api.get('/settings/me'),
+  updatePrivacy: (data) => api.put('/settings/privacy', data),
+};
+
 export default api;

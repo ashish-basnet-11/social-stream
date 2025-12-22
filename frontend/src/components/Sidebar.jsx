@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutGrid, Users, User, LogOut, PlusCircle } from 'lucide-react';
+import { LayoutGrid, Users, User, LogOut, PlusCircle, Settings as SettingsIcon } from 'lucide-react';
 
 const Sidebar = ({ onOpenCreate }) => {
   const { user, logout } = useAuth();
@@ -61,6 +61,15 @@ const Sidebar = ({ onOpenCreate }) => {
           // FIX: Only active if we are on the current user's specific profile page
           active={location.pathname === `/profile/${user?.id}`}
         />
+
+        {/* ADDED SETTINGS LINK */}
+        <SidebarLink
+          to="/settings"
+          icon={<SettingsIcon size={22} />}
+          label="Settings"
+          active={location.pathname === '/settings'}
+        />
+
       </nav>
 
       {/* Sign Out Section - Pinned to bottom */}

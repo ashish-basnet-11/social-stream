@@ -1,4 +1,3 @@
-// src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -10,6 +9,7 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Friends from './pages/Friends';
 import ForgotPassword from './pages/ForgotPassword';
+import Settings from './pages/Settings'; // 1. Import your new Settings page
 
 function App() {
   return (
@@ -21,16 +21,18 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/auth/success" element={<OAuthSuccess />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Protected Routes Wrapper */}
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Home />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/friends" element={<Friends />} />
+            <Route path="/settings" element={<Settings />} /> {/* 2. Add Settings Route */}
           </Route>
 
+          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

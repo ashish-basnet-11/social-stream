@@ -5,13 +5,13 @@ import { prisma } from "../config/db.js";
 const getMyProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: {
                 id: true,
                 name: true,
                 email: true,
+                showEmail: true, // Included for settings state
                 bio: true,
                 avatar: true,
                 provider: true,
@@ -19,17 +19,13 @@ const getMyProfile = async (req, res) => {
                 _count: {
                     select: {
                         posts: true,
-                        sentFriendRequests: {
-                            where: { status: 'accepted' }
-                        }
+                        sentFriendRequests: { where: { status: 'accepted' } }
                     }
                 }
             }
         });
 
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
+        if (!user) return res.status(404).json({ error: "User not found" });
 
         res.status(200).json({
             status: "success",
@@ -43,7 +39,6 @@ const getMyProfile = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Get my profile error:", error);
         res.status(500).json({ error: "Failed to fetch profile" });
     }
 };
@@ -127,6 +122,7 @@ const getUserProfile = async (req, res) => {
                 id: true,
                 name: true,
                 email: true,
+                showEmail: true, // Fetch privacy status
                 bio: true,
                 avatar: true,
                 createdAt: true,
@@ -136,12 +132,15 @@ const getUserProfile = async (req, res) => {
 
         if (!user) return res.status(404).json({ error: "User not found" });
 
+        // Privacy Logic: Mask email if hidden AND viewer is not the owner
+        const canSeeEmail = currentUserId === targetUserId || user.showEmail;
+
         let friendshipStatus = 'none';
         let friendsCount = 0;
         let mutualFriends = [];
 
-        // 1. Get Friendship status and total count
-        const friendsCountData = await prisma.friendRequest.count({
+        // Count friends
+        friendsCount = await prisma.friendRequest.count({
             where: {
                 OR: [
                     { senderId: targetUserId, status: 'accepted' },
@@ -149,10 +148,9 @@ const getUserProfile = async (req, res) => {
                 ]
             }
         });
-        friendsCount = friendsCountData;
 
         if (currentUserId) {
-            // Check status between Me and Target
+            // Check relationship status
             const friendRequest = await prisma.friendRequest.findFirst({
                 where: {
                     OR: [
@@ -168,16 +166,14 @@ const getUserProfile = async (req, res) => {
                 else friendshipStatus = 'request_received';
             }
 
-            // 2. LOGIC FOR MUTUAL FRIENDS
+            // Mutual Friends Logic (Existing)
             if (currentUserId !== targetUserId) {
-                // Find friends of current user
                 const myFriendsRequests = await prisma.friendRequest.findMany({
                     where: { OR: [{ senderId: currentUserId, status: 'accepted' }, { receiverId: currentUserId, status: 'accepted' }] },
                     select: { senderId: true, receiverId: true }
                 });
                 const myFriendIds = myFriendsRequests.map(r => r.senderId === currentUserId ? r.receiverId : r.senderId);
 
-                // Find mutuals: Friends of target user who are also in myFriendIds
                 mutualFriends = await prisma.user.findMany({
                     where: {
                         id: { in: myFriendIds },
@@ -187,7 +183,7 @@ const getUserProfile = async (req, res) => {
                         ]
                     },
                     select: { id: true, name: true, avatar: true },
-                    take: 3 // Only need a few for the preview
+                    take: 3
                 });
             }
         }
@@ -197,20 +193,19 @@ const getUserProfile = async (req, res) => {
             data: {
                 user: {
                     ...user,
+                    email: canSeeEmail ? user.email : null, // MASKING APPLIED HERE
                     postsCount: user._count.posts,
                     friendsCount,
                     friendshipStatus,
-                    mutualFriends, // Now this is sent to the frontend!
+                    mutualFriends,
                     _count: undefined
                 }
             }
         });
     } catch (error) {
-        console.error("Get user profile error:", error);
         res.status(500).json({ error: "Failed to fetch user profile" });
     }
 };
-
 // Search users
 const searchUsers = async (req, res) => {
     try {

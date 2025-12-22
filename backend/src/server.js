@@ -16,7 +16,7 @@ import likeRoutes from './routes/likeRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import friendRoutes from './routes/friendRoutes.js';
-
+import settingsRoutes from './routes/settingsRoutes.js'
 config();
 connectDB();
 
@@ -86,6 +86,7 @@ app.use("/api/friends", friendRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/likes", likeRoutes);
 app.use("/api/comments", commentRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Health check route
 app.get("/api/health", (req, res) => {

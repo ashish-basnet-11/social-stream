@@ -263,12 +263,31 @@ const logout = async (req, res) => {
     });
 };
 
+// backend/src/controllers/authController.js
+
 const getMe = async (req, res) => {
     try {
+        // req.user.id comes from your auth middleware
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.id },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                showEmail: true, // This is the missing piece!
+                avatar: true,
+                bio: true
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
         res.status(200).json({
             status: "success",
             data: {
-                user: req.user
+                user: user // Return the fresh user object with all fields
             }
         });
     } catch (error) {
@@ -276,7 +295,6 @@ const getMe = async (req, res) => {
         res.status(500).json({ error: "Failed to fetch user" });
     }
 };
-
 const forgotPassword = async (req, res) => {
     try {
         const { email } = forgotPasswordSchema.parse(req.body);

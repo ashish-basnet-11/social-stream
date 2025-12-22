@@ -70,13 +70,13 @@ const PostCard = ({ post, onUpdate }) => {
       <div className="relative">
         <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-[32px] p-12 mb-8 flex flex-col items-center justify-center transition-all duration-700 scale-95 opacity-50">
           <div className="w-12 h-12 border-4 border-rose-100 border-t-rose-500 rounded-full animate-spin mb-4" />
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-rose-500 animate-pulse text-center">Purging Transmission</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-rose-500 animate-pulse text-center">Deleting Post</p>
         </div>
         {showToast && (
           <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] animate-in slide-in-from-bottom-10 duration-300">
             <div className="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10">
               <div className="bg-emerald-500 p-1 rounded-full"><CheckCircle2 size={16} /></div>
-              <span className="text-[11px] font-black uppercase tracking-widest">Post vanished from stream.</span>
+              <span className="text-[11px] font-black uppercase tracking-widest">Post deleted from stream.</span>
             </div>
           </div>
         )}
