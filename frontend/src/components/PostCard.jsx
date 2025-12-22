@@ -93,7 +93,7 @@ const PostCard = ({ post, onUpdate }) => {
               <div className="p-4 bg-rose-50 rounded-2xl text-rose-500"><AlertCircle size={32} /></div>
             </div>
             <h3 className="text-center font-black uppercase tracking-tighter text-xl mb-2">Delete Post?</h3>
-            <p className="text-center text-slate-400 text-xs font-bold uppercase tracking-widest mb-8 leading-relaxed">This will permanently remove this transmission from the grid.</p>
+            <p className="text-center text-slate-400 text-xs font-bold uppercase tracking-widest mb-8 leading-relaxed">This will permanently remove this post from the grid.</p>
             <div className="flex flex-col gap-3">
               <button onClick={handleDelete} className="w-full py-4 bg-rose-500 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-rose-600 transition-all active:scale-95">Confirm Delete</button>
               <button onClick={() => setShowConfirm(false)} className="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-slate-900 transition-all">Cancel</button>

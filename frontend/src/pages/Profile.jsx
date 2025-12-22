@@ -13,7 +13,8 @@ import {
   MessageCircle,
   X,
   Settings,
-  ArrowLeft
+  ArrowLeft,
+  Maximize2
 } from 'lucide-react';
 
 const Profile = () => {
@@ -29,8 +30,10 @@ const Profile = () => {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  
+  // New State for Avatar Zoom
+  const [isAvatarOpen, setIsAvatarOpen] = useState(false);
 
-  // CRITICAL LOGIC: Check if this is the logged-in user's page
   const isOwnProfile = currentUser?.id === parseInt(userId);
 
   useEffect(() => {
@@ -63,7 +66,7 @@ const Profile = () => {
     try {
       if (action === 'send') await friendsAPI.sendRequest(parseInt(userId));
       if (action === 'remove') await friendsAPI.removeFriend(parseInt(userId));
-      fetchProfile(); // Refresh profile to get updated friendshipStatus
+      fetchProfile();
     } catch (err) {
       console.error('Friend action failed:', err);
     } finally {
@@ -93,10 +96,20 @@ const Profile = () => {
         {/* Profile Header */}
         <header className="flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-16 mb-16">
           <div className="relative">
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-white border border-slate-200 p-1.5 shadow-xl shadow-slate-200/50 rotate-2">
-              <div className="w-full h-full bg-slate-100 rounded-2xl overflow-hidden -rotate-2">
+            {/* Clickable Avatar Container */}
+            <div 
+              onClick={() => profile?.avatar && setIsAvatarOpen(true)}
+              className={`group relative w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-white border border-slate-200 p-1.5 shadow-xl shadow-slate-200/50 rotate-2 transition-transform hover:scale-105 active:scale-95 ${profile?.avatar ? 'cursor-zoom-in' : ''}`}
+            >
+              <div className="w-full h-full bg-slate-100 rounded-2xl overflow-hidden -rotate-2 relative">
                 {profile?.avatar ? (
-                  <img src={profile.avatar} alt="" className="w-full h-full object-cover" />
+                  <>
+                    <img src={profile.avatar} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                    {/* Hover Overlay Icon */}
+                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Maximize2 size={24} className="text-white drop-shadow-md" />
+                    </div>
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-4xl font-black text-slate-300">
                     {profile?.name[0].toUpperCase()}
@@ -109,7 +122,6 @@ const Profile = () => {
           <div className="flex-1 space-y-6 pt-2 text-center md:text-left">
             <div className="flex flex-col md:flex-row items-center gap-6">
               <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">
-                {/* Now shows the user's actual name even if it's your own profile */}
                 {profile?.name}
                 <span className="text-indigo-600">.</span>
               </h1>
@@ -151,7 +163,7 @@ const Profile = () => {
           </div>
         </header>
 
-        {/* Tabs - Context Aware */}
+        {/* Tabs */}
         <nav className="flex justify-center mb-10">
           <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm">
             <button className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-slate-200">
@@ -199,10 +211,37 @@ const Profile = () => {
           </div>
         )}
 
+        {/* --- MODALS --- */}
+
+        {/* 1. Zoomed Avatar Modal */}
+        {isAvatarOpen && (
+          <div 
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 animate-in fade-in duration-300"
+            onClick={() => setIsAvatarOpen(false)}
+          >
+            <button className="absolute top-6 right-6 p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all">
+              <X size={32} />
+            </button>
+
+            <div 
+              className="relative max-w-[500px] w-full aspect-square rounded-[40px] overflow-hidden border-8 border-white/10 shadow-2xl animate-in zoom-in-95 duration-300"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={profile.avatar} 
+                alt={profile.name} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* 2. Edit Profile Modal */}
         {isEditModalOpen && (
           <EditProfileModal profile={profile} onClose={() => setIsEditModalOpen(false)} onUpdate={fetchProfile} />
         )}
 
+        {/* 3. Post Card Modal */}
         {selectedPost && (
           <div
             className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 transition-all"
