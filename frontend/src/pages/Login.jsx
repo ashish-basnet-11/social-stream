@@ -139,7 +139,7 @@ const Login = () => {
                       to="/forgot-password"
                       className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline"
                     >
-                      Forgot?
+                      Forgot Password?
                     </Link>
                   </div>
                   <input

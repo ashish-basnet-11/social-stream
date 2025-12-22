@@ -69,7 +69,8 @@ const getPostComments = async (req, res) => {
                     select: {
                         id: true,
                         name: true,
-                        email: true
+                        email: true,
+                        avatar: true
                     }
                 }
             }

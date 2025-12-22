@@ -246,7 +246,6 @@ const UserRow = ({ user, action }) => (
           </p>
           <ChevronRight size={14} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
         </div>
-        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{user.email?.split('@')[0]}</p>
       </div>
     </Link>
     <div className="flex items-center">

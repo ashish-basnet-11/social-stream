@@ -242,10 +242,61 @@ const searchUsers = async (req, res) => {
     }
 };
 
+const getSuggestions = async (req, res) => {
+    try {
+        const currentUserId = req.user.id;
+
+        // 1. Get IDs of people you already have a relationship with (any status)
+        const existingInteractions = await prisma.friendRequest.findMany({
+            where: {
+                OR: [
+                    { senderId: currentUserId },
+                    { receiverId: currentUserId }
+                ]
+            },
+            select: {
+                senderId: true,
+                receiverId: true
+            }
+        });
+
+        // 2. Map out the IDs to exclude (them + yourself)
+        const excludedIds = new Set();
+        excludedIds.add(currentUserId);
+        existingInteractions.forEach(req => {
+            excludedIds.add(req.senderId);
+            excludedIds.add(req.receiverId);
+        });
+
+        // 3. Find users not in that excluded set
+        const suggestedUsers = await prisma.user.findMany({
+            where: {
+                id: { notIn: Array.from(excludedIds) }
+            },
+            select: {
+                id: true,
+                name: true,
+                avatar: true,
+                bio: true
+            },
+            take: 5
+        });
+
+        res.status(200).json({
+            status: "success",
+            data: { users: suggestedUsers }
+        });
+    } catch (error) {
+        console.error("Get suggestions error:", error);
+        res.status(500).json({ error: "Failed to fetch suggestions" });
+    }
+};
+
 export { 
     getMyProfile, 
     updateMyProfile,
     uploadAvatar,
     getUserProfile, 
-    searchUsers 
+    searchUsers,
+    getSuggestions 
 };

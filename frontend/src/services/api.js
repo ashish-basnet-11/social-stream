@@ -60,11 +60,17 @@ export const usersAPI = {
   }),
   getUserProfile: (userId) => api.get(`/users/${userId}`),
   searchUsers: (query) => api.get(`/users/search?query=${query}`),
+  
+  // ADD THIS: For the "New Discoveries" sidebar
+  getSuggestions: () => api.get('/users/suggestions'),
 };
 
 // Friends endpoints
 export const friendsAPI = {
+  // Note: I updated the name to 'sendRequest' to match your Home.jsx usage 
+  // or you can change Home.jsx to use friendsAPI.sendRequest
   sendRequest: (receiverId) => api.post('/friends/request', { receiverId }),
+  
   acceptRequest: (requestId) => api.put(`/friends/request/${requestId}/accept`),
   rejectRequest: (requestId) => api.put(`/friends/request/${requestId}/reject`),
   cancelRequest: (requestId) => api.delete(`/friends/request/${requestId}`),
@@ -72,5 +78,4 @@ export const friendsAPI = {
   getPendingRequests: () => api.get('/friends/requests/pending'),
   getFriends: () => api.get('/friends'),
 };
-
 export default api;

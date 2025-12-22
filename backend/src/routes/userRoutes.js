@@ -7,7 +7,8 @@ import {
     updateMyProfile,
     uploadAvatar,
     getUserProfile, 
-    searchUsers 
+    searchUsers,
+    getSuggestions 
 } from '../controllers/userController.js';
 
 const router = express.Router();
@@ -17,6 +18,8 @@ router.get("/me", protect, getMyProfile);
 router.put("/me", protect, updateMyProfile);
 router.post("/me/avatar", protect, upload.single('avatar'), uploadAvatar);
 router.get("/search", protect, searchUsers);
+
+router.get("/suggestions", protect, getSuggestions);
 
 // Public/optional auth routes
 router.get("/:userId", optionalAuth, getUserProfile);

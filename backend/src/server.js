@@ -52,9 +52,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-const isDev = process.env.NODE_ENV === 'development';
 
 // Rate limiters
+
+const isDev = process.env.NODE_ENV === 'development';
+
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: isDev ? 1000 : 100,
@@ -78,7 +80,7 @@ app.use("/api/auth/register", authLimiter);
 
 // API Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/auth", oauthRoutes); // OAuth routes
+app.use("/api/auth", oauthRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/friends", friendRoutes);
 app.use("/api/posts", postsRoutes);
