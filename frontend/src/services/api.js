@@ -67,7 +67,7 @@ export const usersAPI = {
 
 // Friends endpoints
 export const friendsAPI = {
-  // Note: I updated the name to 'sendRequest' to match your Home.jsx usage 
+  // Note: updated the name to 'sendRequest' to match your Home.jsx usage 
   // or you can change Home.jsx to use friendsAPI.sendRequest
   sendRequest: (receiverId) => api.post('/friends/request', { receiverId }),
   

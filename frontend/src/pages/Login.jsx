@@ -52,7 +52,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 p-4 sm:p-6 lg:p-8">
-      <Snowfall color='#C7D2FE' /> {/* Indigo-tinted snow */}
+      <Snowfall color='#C7D2FE' />
 
       <div className="flex flex-col lg:flex-row w-full max-w-6xl bg-white rounded-[32px] shadow-2xl shadow-slate-200 overflow-hidden min-h-[700px] border border-slate-100">
 
