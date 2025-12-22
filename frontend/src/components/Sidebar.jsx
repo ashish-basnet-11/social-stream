@@ -36,7 +36,7 @@ const Sidebar = ({ onOpenCreate }) => {
         <SidebarLink
           to="/friends"
           icon={<Users size={22} />}
-          label="Network"
+          label="Friends"
           active={location.pathname === '/friends'}
         />
 

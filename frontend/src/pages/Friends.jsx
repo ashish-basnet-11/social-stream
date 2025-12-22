@@ -101,8 +101,8 @@ const Friends = () => {
         {/* Segmented Control */}
         <div className="flex bg-white p-1.5 rounded-[20px] mb-10 border border-slate-200 shadow-sm shadow-slate-200/50">
           {[
-            { id: 'friends', label: 'Connections', icon: UserCheck },
-            { id: 'requests', label: 'Invitations', icon: Clock },
+            { id: 'friends', label: 'Friends', icon: UserCheck },
+            { id: 'requests', label: 'Friend Requests', icon: Clock },
             { id: 'search', label: 'Discover', icon: Search }
           ].map((tab) => (
             <button

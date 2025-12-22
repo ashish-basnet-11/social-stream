@@ -118,10 +118,11 @@ const uploadAvatar = async (req, res) => {
 const getUserProfile = async (req, res) => {
     try {
         const { userId } = req.params;
+        const targetUserId = parseInt(userId);
         const currentUserId = req.user?.id;
 
         const user = await prisma.user.findUnique({
-            where: { id: parseInt(userId) },
+            where: { id: targetUserId },
             select: {
                 id: true,
                 name: true,
@@ -129,55 +130,66 @@ const getUserProfile = async (req, res) => {
                 bio: true,
                 avatar: true,
                 createdAt: true,
-                _count: {
-                    select: {
-                        posts: true
-                    }
-                }
+                _count: { select: { posts: true } }
             }
         });
 
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
+        if (!user) return res.status(404).json({ error: "User not found" });
 
-        // Get friendship status if logged in
-        let friendshipStatus = null;
+        let friendshipStatus = 'none';
         let friendsCount = 0;
+        let mutualFriends = [];
+
+        // 1. Get Friendship status and total count
+        const friendsCountData = await prisma.friendRequest.count({
+            where: {
+                OR: [
+                    { senderId: targetUserId, status: 'accepted' },
+                    { receiverId: targetUserId, status: 'accepted' }
+                ]
+            }
+        });
+        friendsCount = friendsCountData;
 
         if (currentUserId) {
-            // Check friendship status
+            // Check status between Me and Target
             const friendRequest = await prisma.friendRequest.findFirst({
                 where: {
                     OR: [
-                        { senderId: currentUserId, receiverId: parseInt(userId) },
-                        { senderId: parseInt(userId), receiverId: currentUserId }
+                        { senderId: currentUserId, receiverId: targetUserId },
+                        { senderId: targetUserId, receiverId: currentUserId }
                     ]
                 }
             });
 
             if (friendRequest) {
-                if (friendRequest.status === 'accepted') {
-                    friendshipStatus = 'friends';
-                } else if (friendRequest.senderId === currentUserId) {
-                    friendshipStatus = 'request_sent';
-                } else {
-                    friendshipStatus = 'request_received';
-                }
-            } else {
-                friendshipStatus = 'none';
+                if (friendRequest.status === 'accepted') friendshipStatus = 'friends';
+                else if (friendRequest.senderId === currentUserId) friendshipStatus = 'request_sent';
+                else friendshipStatus = 'request_received';
             }
 
-            // Count friends
-            const friendsCountData = await prisma.friendRequest.count({
-                where: {
-                    OR: [
-                        { senderId: parseInt(userId), status: 'accepted' },
-                        { receiverId: parseInt(userId), status: 'accepted' }
-                    ]
-                }
-            });
-            friendsCount = friendsCountData;
+            // 2. LOGIC FOR MUTUAL FRIENDS
+            if (currentUserId !== targetUserId) {
+                // Find friends of current user
+                const myFriendsRequests = await prisma.friendRequest.findMany({
+                    where: { OR: [{ senderId: currentUserId, status: 'accepted' }, { receiverId: currentUserId, status: 'accepted' }] },
+                    select: { senderId: true, receiverId: true }
+                });
+                const myFriendIds = myFriendsRequests.map(r => r.senderId === currentUserId ? r.receiverId : r.senderId);
+
+                // Find mutuals: Friends of target user who are also in myFriendIds
+                mutualFriends = await prisma.user.findMany({
+                    where: {
+                        id: { in: myFriendIds },
+                        OR: [
+                            { sentFriendRequests: { some: { receiverId: targetUserId, status: 'accepted' } } },
+                            { receivedFriendRequests: { some: { senderId: targetUserId, status: 'accepted' } } }
+                        ]
+                    },
+                    select: { id: true, name: true, avatar: true },
+                    take: 3 // Only need a few for the preview
+                });
+            }
         }
 
         res.status(200).json({
@@ -188,6 +200,7 @@ const getUserProfile = async (req, res) => {
                     postsCount: user._count.posts,
                     friendsCount,
                     friendshipStatus,
+                    mutualFriends, // Now this is sent to the frontend!
                     _count: undefined
                 }
             }

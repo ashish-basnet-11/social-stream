@@ -30,7 +30,7 @@ const Profile = () => {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
-  const [isAvatarOpen, setIsAvatarOpen] = useState(false); // New state for zooming avatar
+  const [isAvatarOpen, setIsAvatarOpen] = useState(false);
 
   const isOwnProfile = currentUser?.id === parseInt(userId);
 
@@ -42,11 +42,12 @@ const Profile = () => {
   const fetchProfile = async () => {
     try {
       const response = await usersAPI.getUserProfile(userId);
-      setProfile(response.data.data.user);
-    } catch (err) { 
-      setError('Profile not found'); 
-    } finally { 
-      setLoading(false); 
+      const userData = response.data.data.user;
+      setProfile(userData); // This now includes the 'mutualFriends' array
+    } catch (err) {
+      setError('Profile not found');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,8 +55,8 @@ const Profile = () => {
     try {
       const response = await postsAPI.getUserPosts(userId);
       setPosts(response.data.data.posts || []);
-    } catch (err) { 
-      console.error('Failed to fetch posts:', err); 
+    } catch (err) {
+      console.error('Failed to fetch posts:', err);
     }
   };
 
@@ -65,10 +66,10 @@ const Profile = () => {
       if (action === 'send') await friendsAPI.sendRequest(parseInt(userId));
       if (action === 'remove') await friendsAPI.removeFriend(parseInt(userId));
       fetchProfile();
-    } catch (err) { 
-      console.error('Friend action failed:', err); 
-    } finally { 
-      setFriendLoading(false); 
+    } catch (err) {
+      console.error('Friend action failed:', err);
+    } finally {
+      setFriendLoading(false);
     }
   };
 
@@ -91,11 +92,10 @@ const Profile = () => {
     <main className="min-h-screen bg-[#F8FAFC] text-slate-900 pt-12 pb-20">
       <div className="max-w-[935px] mx-auto px-6">
 
-        {/* Profile Header */}
+        {/* Profile Header - Restored Tilted Square Design */}
         <header className="flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-16 mb-16">
           <div className="relative group">
-            {/* Clickable Avatar Container */}
-            <div 
+            <div
               onClick={() => profile?.avatar && setIsAvatarOpen(true)}
               className="w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-white border border-slate-200 p-1.5 shadow-xl shadow-slate-200/50 rotate-2 cursor-zoom-in transition-transform hover:scale-105 active:scale-95"
             >
@@ -122,7 +122,7 @@ const Profile = () => {
                 {profile?.name}
                 <span className="text-indigo-600">.</span>
               </h1>
-              
+
               <div className="flex items-center gap-3">
                 {isOwnProfile ? (
                   <button
@@ -132,10 +132,10 @@ const Profile = () => {
                     <Settings size={16} /> Update Profile
                   </button>
                 ) : (
-                  <FriendshipButton 
-                    status={profile?.friendshipStatus} 
-                    onClick={handleFriendAction} 
-                    loading={friendLoading} 
+                  <FriendshipButton
+                    status={profile?.friendshipStatus}
+                    onClick={handleFriendAction}
+                    loading={friendLoading}
                   />
                 )}
               </div>
@@ -148,36 +148,68 @@ const Profile = () => {
               </div>
               <div className="pl-8">
                 <span className="block text-2xl font-black text-slate-800">{profile?.friendsCount || 0}</span>
-                <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Network</span>
+                <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Friends</span>
               </div>
             </div>
 
-            <div className="max-w-md">
+            <div className="max-w-md space-y-4">
               <p className="text-[15px] leading-relaxed text-slate-500 font-medium">
                 {profile?.bio || (isOwnProfile ? "Tell the world your story..." : "This user prefers to keep their story a mystery.")}
               </p>
+
+              {/* MUTUAL FRIENDS - Styled for Studio Design */}
+              {/* MUTUAL FRIENDS - Styled for Studio Design */}
+              {!isOwnProfile && profile?.mutualFriends?.length > 0 && (
+                <div className="flex items-center justify-center md:justify-start gap-3 pt-2">
+                  <div className="flex -space-x-2.5">
+                    {profile.mutualFriends.slice(0, 3).map((friend, i) => (
+                      <div
+                        key={i}
+                        onClick={() => navigate(`/profile/${friend.id}`)}
+                        className="w-7 h-7 rounded-lg border-2 border-white overflow-hidden bg-slate-200 shadow-sm rotate-3 cursor-pointer hover:rotate-0 hover:z-10 transition-all"
+                      >
+                        <img src={friend.avatar} className="w-full h-full object-cover -rotate-3 hover:rotate-0" alt="" />
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-[12px] text-slate-400 font-bold uppercase tracking-tight">
+                    Friends with{' '}
+                    <span
+                      onClick={() => navigate(`/profile/${profile.mutualFriends[0].id}`)}
+                      className="text-indigo-600 cursor-pointer hover:underline decoration-2 underline-offset-2"
+                    >
+                      {profile.mutualFriends[0].name}
+                    </span>
+                    {profile.mutualFriends.length > 1 && (
+                      <span
+                        onClick={() => navigate(`/profile/${profile.mutualFriends[1].id}`)} // Or open a modal here
+                        className="cursor-pointer hover:text-slate-600 transition-colors"
+                      >
+                        {` +${profile.mutualFriends.length - 1} more`}
+                      </span>
+                    )}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </header>
 
-        {/* Zoomed Avatar Overlay (Instagram Style) */}
+        {/* Zoomed Avatar Overlay - Restored Square Style */}
         {isAvatarOpen && profile?.avatar && (
-          <div 
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          <div
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4 animate-in fade-in duration-200"
             onClick={() => setIsAvatarOpen(false)}
           >
             <button className="absolute top-8 right-8 text-white/50 hover:text-white transition">
               <X size={32} />
             </button>
-            <div 
-              className="relative max-w-full max-h-full aspect-square w-[500px] overflow-hidden rounded-[40px] shadow-2xl border-4 border-white/10 animate-in zoom-in-95 duration-300"
+            <div
+              className="relative max-w-full max-h-full aspect-square w-[500px] overflow-hidden rounded-[48px] shadow-2xl border-8 border-white animate-in zoom-in-95 duration-300"
               onClick={(e) => e.stopPropagation()}
             >
-              <img 
-                src={profile.avatar} 
-                className="w-full h-full object-cover" 
-                alt="Profile Zoom" 
-              />
+              <img src={profile.avatar} className="w-full h-full object-cover" alt="Profile" />
             </div>
           </div>
         )}
@@ -186,7 +218,7 @@ const Profile = () => {
         <nav className="flex justify-center mb-10">
           <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm">
             <button className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-slate-200">
-              <Grid size={14} /> 
+              <Grid size={14} />
               {isOwnProfile ? 'My Feed' : "User's Feed"}
             </button>
             <button className="flex items-center gap-2 px-8 py-2.5 text-slate-400 text-[11px] font-black uppercase tracking-widest cursor-not-allowed">
@@ -218,7 +250,6 @@ const Profile = () => {
                     {post.caption?.substring(0, 80)}...
                   </div>
                 )}
-
                 <div className="absolute inset-0 bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6">
                   <div className="bg-white p-3 rounded-2xl shadow-xl flex items-center gap-4">
                     <div className="flex items-center gap-1.5 text-rose-500 font-black"><Heart size={18} fill="currentColor" /> {post.likesCount || 0}</div>
@@ -230,31 +261,16 @@ const Profile = () => {
           </div>
         )}
 
+        {/* Modals */}
         {isEditModalOpen && (
           <EditProfileModal profile={profile} onClose={() => setIsEditModalOpen(false)} onUpdate={fetchProfile} />
         )}
 
         {selectedPost && (
-          <div
-            className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 transition-all"
-            onClick={() => setSelectedPost(null)}
-          >
-            <button
-              onClick={() => setSelectedPost(null)}
-              className="absolute top-8 right-8 text-slate-800 hover:text-indigo-600 transition p-2 bg-white rounded-full shadow-lg z-[160]"
-            >
-              <X size={24} />
-            </button>
-
-            <div
-              className="w-full max-w-[800px] max-h-[90vh] overflow-y-auto no-scrollbar bg-[#F8FAFC] rounded-[40px] shadow-2xl border border-white"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <PostCard
-                post={selectedPost}
-                onDelete={() => { setSelectedPost(null); fetchUserPosts(); }}
-                onUpdate={fetchUserPosts}
-              />
+          <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4" onClick={() => setSelectedPost(null)}>
+            <button onClick={() => setSelectedPost(null)} className="absolute top-8 right-8 text-slate-800 hover:text-indigo-600 p-2 bg-white rounded-full shadow-lg z-[160]"><X size={24} /></button>
+            <div className="w-full max-w-[800px] max-h-[90vh] overflow-y-auto no-scrollbar bg-[#F8FAFC] rounded-[40px] shadow-2xl border border-white" onClick={(e) => e.stopPropagation()}>
+              <PostCard post={selectedPost} onDelete={() => { setSelectedPost(null); fetchUserPosts(); }} onUpdate={fetchUserPosts} />
             </div>
           </div>
         )}
