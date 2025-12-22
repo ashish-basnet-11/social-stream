@@ -15,7 +15,7 @@ const PostCard = ({ post, onUpdate }) => {
   const [likesCount, setLikesCount] = useState(post.likesCount);
   const [commentsCount, setCommentsCount] = useState(post.commentsCount);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [commentsLoading, setCommentsLoading] = useState(false); // Added loading state
+  const [commentsLoading, setCommentsLoading] = useState(false); 
   const [showToast, setShowToast] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 

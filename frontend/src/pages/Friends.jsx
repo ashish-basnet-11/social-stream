@@ -93,7 +93,7 @@ const Friends = () => {
       <div className="max-w-[700px] w-full">
         <header className="mb-10 text-center md:text-left">
           <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">
-            Network<span className="text-indigo-600">.</span>
+            Friends<span className="text-indigo-600">.</span>
           </h1>
           <p className="text-slate-500 font-medium mt-2">Grow your circle and manage connections.</p>
         </header>
