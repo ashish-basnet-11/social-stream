@@ -39,6 +39,8 @@ model User {
 
   sentFriendRequests     FriendRequest[] @relation("SentRequests")
   receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
+  receivedNotifications Notification[] @relation("receivedNotifications")
+  sentNotifications     Notification[] @relation("sentNotifications")
 }
 model FriendRequest {
   id        Int      @id @default(autoincrement())
@@ -93,4 +95,24 @@ model Like {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  FRIEND_REQUEST
+  FRIEND_ACCEPT
+}
+
+model Notification {
+  id          Int              @id @default(autoincrement())
+  recipientId Int              // Who gets the notification
+  senderId    Int              // Who triggered it
+  type        NotificationType
+  postId      Int?             // Optional: for likes/comments
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  recipient   User             @relation("receivedNotifications", fields: [recipientId], references: [id])
+  sender      User             @relation("sentNotifications", fields: [senderId], references: [id])
 }

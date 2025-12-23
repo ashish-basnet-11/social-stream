@@ -67,6 +67,13 @@ const sendFriendRequest = async (req, res) => {
             }
         });
 
+        // TRIGGER NOTIFICATION
+        await createNotification({
+            recipientId: parseInt(receiverId),
+            senderId: senderId,
+            type: 'FRIEND_REQUEST'
+        });
+
         res.status(201).json({
             status: "success",
             message: "Friend request sent",
@@ -93,8 +100,8 @@ const acceptFriendRequest = async (req, res) => {
         }
 
         if (friendRequest.receiverId !== userId) {
-            return res.status(403).json({ 
-                error: "You can only accept requests sent to you" 
+            return res.status(403).json({
+                error: "You can only accept requests sent to you"
             });
         }
 
@@ -115,6 +122,13 @@ const acceptFriendRequest = async (req, res) => {
                     }
                 }
             }
+        });
+        // TRIGGER NOTIFICATION
+        // Note: We notify the SENDER that their request was accepted
+        await createNotification({
+            recipientId: friendRequest.senderId,
+            senderId: userId, // The person who clicked 'Accept'
+            type: 'FRIEND_ACCEPT'
         });
 
         res.status(200).json({
@@ -143,8 +157,8 @@ const rejectFriendRequest = async (req, res) => {
         }
 
         if (friendRequest.receiverId !== userId) {
-            return res.status(403).json({ 
-                error: "You can only reject requests sent to you" 
+            return res.status(403).json({
+                error: "You can only reject requests sent to you"
             });
         }
 
@@ -178,8 +192,8 @@ const cancelFriendRequest = async (req, res) => {
         }
 
         if (friendRequest.senderId !== userId) {
-            return res.status(403).json({ 
-                error: "You can only cancel requests you sent" 
+            return res.status(403).json({
+                error: "You can only cancel requests you sent"
             });
         }
 
@@ -303,7 +317,7 @@ const getFriends = async (req, res) => {
         });
 
         // Extract friend data (the user who is NOT the current user)
-        const friends = friendRequests.map(req => 
+        const friends = friendRequests.map(req =>
             req.senderId === userId ? req.receiver : req.sender
         );
 

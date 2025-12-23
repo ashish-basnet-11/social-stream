@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { createNotification, removeNotification } from "../utils/notif.js"; // Adjust path if needed
 
 // Toggle like on a post (like if not liked, unlike if already liked)
 const toggleLike = async (req, res) => {
@@ -6,74 +7,57 @@ const toggleLike = async (req, res) => {
         const { postId } = req.params;
         const userId = req.user.id;
 
-        // Check if post exists
         const post = await prisma.post.findUnique({
             where: { id: parseInt(postId) }
         });
 
-        if (!post) {
-            return res.status(404).json({ error: "Post not found" });
-        }
+        if (!post) return res.status(404).json({ error: "Post not found" });
 
-        // Check if user already liked this post
         const existingLike = await prisma.like.findUnique({
-            where: {
-                userId_postId: {
-                    userId: userId,
-                    postId: parseInt(postId)
-                }
-            }
+            where: { userId_postId: { userId, postId: parseInt(postId) } }
         });
 
         if (existingLike) {
-            // Unlike: delete the like
+            // --- UNLIKE LOGIC ---
             await prisma.like.delete({
-                where: {
-                    userId_postId: {
-                        userId: userId,
-                        postId: parseInt(postId)
-                    }
-                }
+                where: { userId_postId: { userId, postId: parseInt(postId) } }
             });
 
-            // Get updated likes count
+            // DELETE THE NOTIFICATION
+            await removeNotification({
+                recipientId: post.authorId,
+                senderId: userId,
+                type: 'LIKE',
+                postId: post.id
+            });
+
             const likesCount = await prisma.like.count({
                 where: { postId: parseInt(postId) }
             });
 
-            return res.status(200).json({
-                status: "success",
-                message: "Post unliked",
-                data: {
-                    isLiked: false,
-                    likesCount
-                }
-            });
+            return res.status(200).json({ status: "success", data: { isLiked: false, likesCount } });
+
         } else {
-            // Like: create new like
+            // --- LIKE LOGIC ---
             await prisma.like.create({
-                data: {
-                    userId: userId,
-                    postId: parseInt(postId)
-                }
+                data: { userId, postId: parseInt(postId) }
             });
 
-            // Get updated likes count
+            // CREATE THE NOTIFICATION
+            await createNotification({
+                recipientId: post.authorId,
+                senderId: userId,
+                type: 'LIKE',
+                postId: post.id
+            });
+
             const likesCount = await prisma.like.count({
                 where: { postId: parseInt(postId) }
             });
 
-            return res.status(201).json({
-                status: "success",
-                message: "Post liked",
-                data: {
-                    isLiked: true,
-                    likesCount
-                }
-            });
+            return res.status(201).json({ status: "success", data: { isLiked: true, likesCount } });
         }
     } catch (error) {
-        console.error("Toggle like error:", error);
         res.status(500).json({ error: "Failed to toggle like" });
     }
 };

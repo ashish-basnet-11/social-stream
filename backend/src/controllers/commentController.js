@@ -9,8 +9,8 @@ const createComment = async (req, res) => {
 
         // Validate input
         if (!content || content.trim().length === 0) {
-            return res.status(400).json({ 
-                error: "Comment content is required" 
+            return res.status(400).json({
+                error: "Comment content is required"
             });
         }
 
@@ -38,6 +38,13 @@ const createComment = async (req, res) => {
                     }
                 }
             }
+        });
+
+        await createNotification({
+            recipientId: post.authorId,
+            senderId: userId,
+            type: 'COMMENT',
+            postId: post.id
         });
 
         res.status(201).json({
@@ -106,8 +113,8 @@ const updateComment = async (req, res) => {
         const userId = req.user.id;
 
         if (!content || content.trim().length === 0) {
-            return res.status(400).json({ 
-                error: "Comment content is required" 
+            return res.status(400).json({
+                error: "Comment content is required"
             });
         }
 
@@ -121,8 +128,8 @@ const updateComment = async (req, res) => {
         }
 
         if (existingComment.authorId !== userId) {
-            return res.status(403).json({ 
-                error: "You don't have permission to update this comment" 
+            return res.status(403).json({
+                error: "You don't have permission to update this comment"
             });
         }
 
@@ -173,10 +180,10 @@ const deleteComment = async (req, res) => {
         }
 
         // Allow deletion if user is comment author OR post author
-        if (existingComment.authorId !== userId && 
+        if (existingComment.authorId !== userId &&
             existingComment.post.authorId !== userId) {
-            return res.status(403).json({ 
-                error: "You don't have permission to delete this comment" 
+            return res.status(403).json({
+                error: "You don't have permission to delete this comment"
             });
         }
 
@@ -194,9 +201,9 @@ const deleteComment = async (req, res) => {
     }
 };
 
-export { 
-    createComment, 
-    getPostComments, 
-    updateComment, 
-    deleteComment 
+export {
+    createComment,
+    getPostComments,
+    updateComment,
+    deleteComment
 };

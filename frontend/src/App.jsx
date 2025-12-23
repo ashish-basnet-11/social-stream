@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import Friends from './pages/Friends';
 import ForgotPassword from './pages/ForgotPassword';
 import Settings from './pages/Settings';
+import Notifications from './pages/Notifications';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           {/* Protected Routes Wrapper */}
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Home />} />
+            <Route path="/notifications" element={<Notifications />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/settings" element={<Settings />} />
