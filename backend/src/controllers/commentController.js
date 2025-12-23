@@ -1,4 +1,6 @@
 import { prisma } from "../config/db.js";
+import { createNotification } from "../utils/notif.js"; // Adjust path if needed
+
 
 // Create a comment on a post
 const createComment = async (req, res) => {

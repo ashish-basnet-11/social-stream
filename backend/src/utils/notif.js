@@ -1,21 +1,21 @@
 import { prisma } from "../config/db.js";
 
+// utils/notif.js
 export const createNotification = async ({ recipientId, senderId, type, postId = null }) => {
   try {
-    // 1. Don't notify if I'm liking/commenting on my own stuff
     if (recipientId === senderId) return;
 
-    // 2. Create the notification
     await prisma.notification.create({
       data: {
-        recipientId,
-        senderId,
-        type,
-        postId
+        recipientId: parseInt(recipientId),
+        senderId: parseInt(senderId),
+        type, // Ensure this matches LIKE, COMMENT, FRIEND_REQUEST, or FRIEND_ACCEPT
+        postId: postId ? parseInt(postId) : null
       }
     });
   } catch (error) {
     console.error("Notification creation failed:", error);
+    throw error; // Throw so the controller knows it failed
   }
 };
 

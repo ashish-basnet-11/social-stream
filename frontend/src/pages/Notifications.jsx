@@ -48,12 +48,12 @@ const Notifications = () => {
             },
             FRIEND_REQUEST: {
                 icon: <UserPlus size={16} className="text-amber-500" />,
-                text: "sent you a network request",
+                text: "sent you a friend request",
                 bg: "bg-amber-50",
             },
             FRIEND_ACCEPT: {
                 icon: <CheckCircle2 size={16} className="text-emerald-500" />,
-                text: "accepted your connection",
+                text: "accepted your friend request",
                 bg: "bg-emerald-50",
             },
         };
@@ -89,7 +89,7 @@ const Notifications = () => {
                         <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-200 mb-4">
                             <Inbox size={32} />
                         </div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-300">Your stream is quiet</p>
+                        <p className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-300">You don't have any notifications</p>
                     </div>
                 ) : (
                     notifications.map((notif) => {

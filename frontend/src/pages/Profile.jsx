@@ -40,8 +40,7 @@ const Profile = () => {
   useEffect(() => {
     fetchProfile();
     fetchUserPosts();
-  }, [userId, currentUser]); // Re-fetch if currentUser changes (e.g., privacy toggle)
-
+  }, [userId, currentUser]);
   const fetchProfile = async () => {
     try {
       const response = await usersAPI.getUserProfile(userId);

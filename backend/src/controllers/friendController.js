@@ -1,4 +1,6 @@
 import { prisma } from "../config/db.js";
+import { createNotification } from "../utils/notif.js"; // Adjust path if needed
+
 
 // Send friend request
 const sendFriendRequest = async (req, res) => {
@@ -68,10 +70,22 @@ const sendFriendRequest = async (req, res) => {
         });
 
         // TRIGGER NOTIFICATION
-        await createNotification({
-            recipientId: parseInt(receiverId),
-            senderId: senderId,
-            type: 'FRIEND_REQUEST'
+        try {
+            await createNotification({
+                recipientId: parseInt(receiverId), // Force integer here
+                senderId: senderId,
+                type: 'FRIEND_REQUEST'
+            });
+        } catch (notifError) {
+            // Log it, but don't let it crash the whole request
+            console.error("Notification trigger failed:", notifError);
+        }
+
+        // ALWAYS return success if the friendRequest record was created
+        res.status(201).json({
+            status: "success",
+            message: "Friend request sent",
+            data: { friendRequest }
         });
 
         res.status(201).json({
@@ -127,8 +141,8 @@ const acceptFriendRequest = async (req, res) => {
         // Note: We notify the SENDER that their request was accepted
         await createNotification({
             recipientId: friendRequest.senderId,
-            senderId: userId, // The person who clicked 'Accept'
-            type: 'FRIEND_ACCEPT'
+            senderId: userId,
+            type: 'FRIEND_ACCEPT' // Must be exactly 'FRIEND_ACCEPT'
         });
 
         res.status(200).json({
