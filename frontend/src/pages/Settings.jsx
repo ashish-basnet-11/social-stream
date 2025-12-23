@@ -75,7 +75,6 @@ const Settings = () => {
                     </div>
                 </div>
             )}
-            {/* --------------------------- */}
 
             <div className="max-w-2xl mx-auto">
                

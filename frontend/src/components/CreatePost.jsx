@@ -16,7 +16,7 @@ const CreatePost = ({ onPostCreated, onClose }) => {
     if (file && file.type.startsWith('image/')) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
-      setError(''); // Clear errors if file is valid
+      setError('');
     } else {
       setError('Please upload a valid image file');
     }

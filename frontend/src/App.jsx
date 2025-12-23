@@ -9,7 +9,7 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Friends from './pages/Friends';
 import ForgotPassword from './pages/ForgotPassword';
-import Settings from './pages/Settings'; // 1. Import your new Settings page
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -28,7 +28,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/friends" element={<Friends />} />
-            <Route path="/settings" element={<Settings />} /> {/* 2. Add Settings Route */}
+            <Route path="/settings" element={<Settings />} />
           </Route>
 
           {/* Fallback */}
