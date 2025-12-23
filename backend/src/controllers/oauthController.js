@@ -1,4 +1,3 @@
-// backend/src/controllers/oauthController.js
 import generateToken from "../utils/generateToken.js";
 
 // Google OAuth callback handler

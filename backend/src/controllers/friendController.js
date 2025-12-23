@@ -1,4 +1,3 @@
-// backend/src/controllers/friendController.js
 import { prisma } from "../config/db.js";
 
 // Send friend request

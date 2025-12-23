@@ -1,4 +1,3 @@
-// backend/src/config/cloudinary.js
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';

@@ -1,4 +1,3 @@
-// backend/src/controllers/userController.js
 import { prisma } from "../config/db.js";
 
 // Get current user's profile
@@ -11,7 +10,7 @@ const getMyProfile = async (req, res) => {
                 id: true,
                 name: true,
                 email: true,
-                showEmail: true, // Included for settings state
+                showEmail: true,
                 bio: true,
                 avatar: true,
                 provider: true,
@@ -166,7 +165,7 @@ const getUserProfile = async (req, res) => {
                 else friendshipStatus = 'request_received';
             }
 
-            // Mutual Friends Logic (Existing)
+            // Mutual Friends Logic
             if (currentUserId !== targetUserId) {
                 const myFriendsRequests = await prisma.friendRequest.findMany({
                     where: { OR: [{ senderId: currentUserId, status: 'accepted' }, { receiverId: currentUserId, status: 'accepted' }] },

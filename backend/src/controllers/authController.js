@@ -1,12 +1,11 @@
-// backend/src/controllers/authController.js
 import { prisma } from "../config/db.js";
 import bcrypt from 'bcryptjs';
 import generateToken from "../utils/generateToken.js";
 import {
     registerSchema,
     loginSchema,
-    forgotPasswordSchema, // <-- Make sure this is here
-    resetPasswordSchema    // <-- Make sure this is here
+    forgotPasswordSchema,
+    resetPasswordSchema   
 }
     from "../validators/authValidators.js";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/emailService.js";
