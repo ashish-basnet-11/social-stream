@@ -25,7 +25,7 @@ model User {
   verificationExpiry   DateTime?
   
   // OAuth fields
-  provider             String?   @default("local") // "local", "google", "github"
+  provider             String?   @default("local")
   providerId           String?
   
   // Timestamps
@@ -106,8 +106,8 @@ enum NotificationType {
 
 model Notification {
   id          Int              @id @default(autoincrement())
-  recipientId Int              // Who gets the notification
-  senderId    Int              // Who triggered it
+  recipientId Int              
+  senderId    Int              
   type        NotificationType
   postId      Int?             // Optional: for likes/comments
   isRead      Boolean          @default(false)

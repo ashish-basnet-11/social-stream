@@ -35,7 +35,7 @@ const Profile = () => {
   const [selectedPost, setSelectedPost] = useState(null);
   const [isAvatarOpen, setIsAvatarOpen] = useState(false);
 
-  const isOwnProfile = currentUser?.id === parseInt(userId);
+  const isOwnProfile = userId === 'me' || currentUser?.id === parseInt(userId);
 
   useEffect(() => {
     fetchProfile();
@@ -43,10 +43,19 @@ const Profile = () => {
   }, [userId, currentUser]);
   const fetchProfile = async () => {
     try {
-      const response = await usersAPI.getUserProfile(userId);
+      setLoading(true);
+      let response;
+
+      if (userId === 'me') {
+        response = await usersAPI.getMyProfile();
+      } else {
+        response = await usersAPI.getUserProfile(userId);
+      }
+
       const userData = response.data.data.user;
       setProfile(userData);
     } catch (err) {
+      console.error('Profile fetch error:', err);
       setError('Profile not found');
     } finally {
       setLoading(false);
@@ -55,7 +64,12 @@ const Profile = () => {
 
   const fetchUserPosts = async () => {
     try {
-      const response = await postsAPI.getUserPosts(userId);
+      // If userId is "me", use the currentUser.id from context
+      const targetId = userId === 'me' ? currentUser?.id : userId;
+
+      if (!targetId) return; // Wait until we have a valid ID
+
+      const response = await postsAPI.getUserPosts(targetId);
       setPosts(response.data.data.posts || []);
     } catch (err) {
       console.error('Failed to fetch posts:', err);

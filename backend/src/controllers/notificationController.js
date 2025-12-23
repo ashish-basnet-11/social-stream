@@ -44,3 +44,21 @@ export const markOneRead = async (req, res) => {
         res.status(500).json({ error: "Failed to update notification" });
     }
 };
+
+export const deleteNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id; // Ensure user owns the notification
+
+    await prisma.notification.delete({
+      where: {
+        id: parseInt(id),
+        recipientId: userId // Security check
+      }
+    });
+
+    res.status(200).json({ status: "success", message: "Notification deleted" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete notification" });
+  }
+};

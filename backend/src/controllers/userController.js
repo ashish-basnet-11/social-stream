@@ -211,41 +211,56 @@ const searchUsers = async (req, res) => {
         const { query } = req.query;
         const currentUserId = req.user?.id;
 
-        if (!query || query.trim().length < 2) {
-            return res.status(400).json({ 
-                error: "Search query must be at least 2 characters" 
-            });
-        }
-
         const users = await prisma.user.findMany({
             where: {
                 AND: [
-                    { id: { not: currentUserId } }, // Exclude current user
+                    { id: { not: currentUserId } },
                     {
                         OR: [
-                            { name: { contains: query} }, //, mode: 'insensitive' 
-                            { email: { contains: query} } //, mode: 'insensitive' 
+                            { name: { contains: query } },
+                            { email: { contains: query } }
                         ]
                     }
                 ]
             },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                avatar: true,
-                bio: true
+            include: {
+                // Use the exact names from your schema
+                receivedFriendRequests: { 
+                    where: { senderId: currentUserId } 
+                },
+                sentFriendRequests: { 
+                    where: { receiverId: currentUserId } 
+                }
             },
             take: 10
         });
 
+        const formattedUsers = users.map(u => {
+            // Logic to determine status based on FriendRequest model
+            // 1. Check if ANY request between these two is 'accepted'
+            const isAccepted = 
+                u.receivedFriendRequests.some(r => r.status === 'accepted') || 
+                u.sentFriendRequests.some(r => r.status === 'accepted');
+
+            // 2. Check if there is a 'pending' request sent BY the current user
+            const isPending = u.receivedFriendRequests.some(r => r.status === 'pending');
+
+            return {
+                id: u.id,
+                name: u.name,
+                avatar: u.avatar,
+                bio: u.bio,
+                friendshipStatus: isAccepted ? 'friends' : isPending ? 'request_sent' : 'none'
+            };
+        });
+
         res.status(200).json({
             status: "success",
-            data: { users }
+            data: { users: formattedUsers }
         });
     } catch (error) {
-        console.error("Search users error:", error);
-        res.status(500).json({ error: "Failed to search users" });
+        console.error("SEARCH ERROR:", error);
+        res.status(500).json({ error: "Search failed" });
     }
 };
 
