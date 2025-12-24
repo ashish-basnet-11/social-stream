@@ -2,20 +2,29 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usersAPI, friendsAPI } from '../services/api';
-import { Plus, LogOut, Settings, Search, UserPlus, Clock, UserCheck, X } from 'lucide-react';
+import { 
+  Plus, LogOut, Settings, Search, UserPlus, 
+  Clock, UserCheck, X, User, ChevronDown 
+} from 'lucide-react';
 
 const Navbar = ({ onOpenCreate }) => {
     const { logout, user: currentUser } = useAuth();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    
     const searchRef = useRef(null);
+    const profileRef = useRef(null);
 
-    // Close search when clicking outside
+    // Close search and profile dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (searchRef.current && !searchRef.current.contains(e.target)) {
                 setIsSearching(false);
+            }
+            if (profileRef.current && !profileRef.current.contains(e.target)) {
+                setIsProfileOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -63,7 +72,6 @@ const Navbar = ({ onOpenCreate }) => {
                 </Link>
 
                 {/* Global Search Bar */}
-                {/* Global Search Bar */}
                 <div className="relative flex-1 max-w-md mx-8" ref={searchRef}>
                     <div className="relative group">
                         <Search className={`absolute left-4 top-1/2 -translate-y-1/2 transition-all duration-300 ${query ? 'text-indigo-600 scale-110' : 'text-slate-400'}`} size={18} />
@@ -85,7 +93,6 @@ const Navbar = ({ onOpenCreate }) => {
                     </div>
 
                     {/* Search Dropdown Results */}
-                    {/* Search Dropdown Results */}
                     {isSearching && (
                         <div className="absolute top-full mt-3 w-full bg-white border border-slate-100 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] shadow-indigo-500/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                             {results.length > 0 ? (
@@ -94,7 +101,6 @@ const Navbar = ({ onOpenCreate }) => {
                                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Top Matches</span>
                                     </div>
                                     {results.map((u) => {
-                                        // Normalize friendship check
                                         const isAlreadyFriend = u.isFriend || u.friendshipStatus === 'friends';
                                         const isRequestSent = u.requestSent || u.friendshipStatus === 'request_sent';
 
@@ -121,7 +127,7 @@ const Navbar = ({ onOpenCreate }) => {
                                                     ) : isAlreadyFriend ? (
                                                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
                                                             <UserCheck size={14} />
-                                                            <span className="text-[9px] font-black uppercase">Connected</span>
+                                                            <span className="text-[9px] font-black uppercase">Friends</span>
                                                         </div>
                                                     ) : isRequestSent ? (
                                                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 rounded-lg">
@@ -155,15 +161,65 @@ const Navbar = ({ onOpenCreate }) => {
                         </div>
                     )}
                 </div>
+
                 {/* Action Area */}
-                <div className="flex items-center gap-3">
-                    <button onClick={onOpenCreate} className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100">
+                <div className="flex items-center gap-4">
+                    <button onClick={onOpenCreate} className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100 active:scale-95">
                         <Plus size={16} strokeWidth={3} />
                         <span className="hidden sm:block">Create</span>
                     </button>
-                    <div className="h-8 w-px bg-slate-200 mx-2" />
-                    <Link to="/settings" className="p-2 text-slate-400 hover:text-indigo-600 rounded-xl transition-all"><Settings size={20} /></Link>
-                    <button onClick={logout} className="p-2 text-slate-400 hover:text-rose-500 rounded-xl transition-all"><LogOut size={20} /></button>
+
+                    <div className="h-8 w-px bg-slate-200 mx-1" />
+
+                    {/* Profile Dropdown */}
+                    <div className="relative" ref={profileRef}>
+                        <button 
+                            onClick={() => setIsProfileOpen(!isProfileOpen)}
+                            className="flex items-center gap-2 p-1 pr-3 rounded-2xl hover:bg-slate-50 transition-all group"
+                        >
+                            <div className="w-10 h-10 rounded-xl bg-slate-100 overflow-hidden border-2 border-transparent group-hover:border-indigo-100 transition-all shadow-sm">
+                                <img 
+                                    src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${currentUser?.name}&background=EEF2FF&color=4F46E5`} 
+                                    className="w-full h-full object-cover"
+                                    alt="Me"
+                                />
+                            </div>
+                            <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {isProfileOpen && (
+                            <div className="absolute right-0 mt-3 w-56 bg-white border border-slate-100 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] py-2 animate-in fade-in zoom-in-95 duration-200">
+                                <Link 
+                                    to="/profile/me" 
+                                    onClick={() => setIsProfileOpen(false)}
+                                    className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all mx-2 rounded-xl group"
+                                >
+                                    <User size={18} className="group-hover:scale-110 transition-transform" />
+                                    <span className="text-xs font-black uppercase tracking-tight">My Profile</span>
+                                </Link>
+
+                                <Link 
+                                    to="/settings" 
+                                    onClick={() => setIsProfileOpen(false)}
+                                    className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all mx-2 rounded-xl group"
+                                >
+                                    <Settings size={18} className="group-hover:rotate-45 transition-transform" />
+                                    <span className="text-xs font-black uppercase tracking-tight">Settings</span>
+                                </Link>
+
+                                <div className="h-px bg-slate-50 my-2 mx-4" />
+
+                                <button 
+                                    onClick={() => { setIsProfileOpen(false); logout(); }}
+                                    className="flex items-center gap-3 w-[calc(100%-16px)] mx-2 px-4 py-3 text-rose-500 hover:bg-rose-50 transition-all rounded-xl group"
+                                >
+                                    <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
+                                    <span className="text-xs font-black uppercase tracking-tight">Sign Out</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </header>

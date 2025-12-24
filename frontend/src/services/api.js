@@ -61,7 +61,6 @@ export const usersAPI = {
   getUserProfile: (userId) => api.get(`/users/${userId}`),
   searchUsers: (query) => api.get(`/users/search?query=${query}`),
   
-  // ADD THIS: For the "New Discoveries" sidebar
   getSuggestions: () => api.get('/users/suggestions'),
 };
 

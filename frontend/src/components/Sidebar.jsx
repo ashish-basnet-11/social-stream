@@ -34,13 +34,6 @@ const Sidebar = () => {
           label="Network"
           active={location.pathname === '/friends'}
         />
-
-        <SidebarLink
-          to="/profile/me" // Or your specific profile logic
-          icon={<User size={20} />}
-          label="Profile"
-          active={location.pathname.startsWith('/profile')}
-        />
       </nav>
     </div>
   );

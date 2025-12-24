@@ -15,7 +15,7 @@ import {
   Settings,
   ArrowLeft,
   Maximize2,
-  Mail, // Added for the email badge
+  Mail,
   ShieldCheck,
   ShieldOff
 } from 'lucide-react';
