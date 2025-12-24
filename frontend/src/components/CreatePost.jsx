@@ -9,9 +9,8 @@ const CreatePost = ({ onPostCreated, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
-  const [isDragging, setIsDragging] = useState(false); // Track drag state
+  const [isDragging, setIsDragging] = useState(false);
 
-  // Helper to handle file selection logic
   const handleFile = (file) => {
     if (file && file.type.startsWith('image/')) {
       setImageFile(file);
@@ -22,7 +21,6 @@ const CreatePost = ({ onPostCreated, onClose }) => {
     }
   };
 
-  // Drag & Drop Handlers
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -73,11 +71,11 @@ const CreatePost = ({ onPostCreated, onClose }) => {
         {showSuccess && (
           <div className="absolute inset-x-0 bottom-8 z-[110] flex justify-center px-8 pointer-events-none">
             <div className="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-toast">
-              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+              <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-rose-500/20">
                 <CheckCircle2 size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 leading-none mb-1">Success</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-rose-400 leading-none mb-1">Success</span>
                 <span className="text-xs font-bold tracking-tight">Post published to your feed</span>
               </div>
             </div>
@@ -86,14 +84,14 @@ const CreatePost = ({ onPostCreated, onClose }) => {
 
         {/* Header */}
         <div className="flex items-center justify-between px-8 py-6 border-b border-slate-50">
-          <div className="flex items-center gap-2 text-indigo-600">
+          <div className="flex items-center gap-2 text-rose-600">
             <Sparkles size={18} fill="currentColor" className="opacity-80" />
             <h3 className="font-black uppercase tracking-tighter italic text-slate-900">
-              New Post<span className="text-indigo-600">.</span>
+              New Post<span className="text-rose-600">.</span>
             </h3>
           </div>
           {!showSuccess && (
-            <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-xl text-slate-400 hover:text-slate-900 transition-all">
+            <button onClick={onClose} className="p-2 hover:bg-rose-50 rounded-xl text-slate-400 hover:text-rose-600 transition-all">
               <X size={20} />
             </button>
           )}
@@ -106,7 +104,7 @@ const CreatePost = ({ onPostCreated, onClose }) => {
             </div>
           )}
 
-          {/* Media Upload Area with Drag and Drop */}
+          {/* Media Upload Area (Rose Themed) */}
           {!imagePreview ? (
             <label 
               onDragOver={handleDragOver}
@@ -114,17 +112,17 @@ const CreatePost = ({ onPostCreated, onClose }) => {
               onDrop={handleDrop}
               className={`group flex flex-col items-center justify-center h-64 border-2 border-dashed rounded-[24px] cursor-pointer transition-all duration-300 ${
                 isDragging 
-                  ? 'border-indigo-600 bg-indigo-50/50 scale-[0.98]' 
-                  : 'border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/30'
+                  ? 'border-rose-600 bg-rose-50/50 scale-[0.98]' 
+                  : 'border-slate-100 hover:border-rose-200 hover:bg-rose-50/30'
               }`}
             >
               <div className={`p-4 rounded-2xl transition-all ${
-                isDragging ? 'bg-indigo-600 text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-white group-hover:text-indigo-600'
+                isDragging ? 'bg-rose-600 text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-white group-hover:text-rose-600'
               }`}>
                 <ImageIcon size={32} />
               </div>
               <span className={`mt-4 text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${
-                isDragging ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'
+                isDragging ? 'text-rose-600' : 'text-slate-400 group-hover:text-slate-600'
               }`}>
                 {isDragging ? 'Drop it now!' : 'Drop media or click to browse'}
               </span>
@@ -137,7 +135,7 @@ const CreatePost = ({ onPostCreated, onClose }) => {
               <button 
                 type="button" 
                 onClick={() => {setImageFile(null); setImagePreview(null);}}
-                className="absolute top-4 right-4 bg-white/90 backdrop-blur-md p-2 rounded-xl text-slate-900 hover:bg-white shadow-xl transition-all active:scale-90"
+                className="absolute top-4 right-4 bg-white/90 backdrop-blur-md p-2 rounded-xl text-slate-900 hover:text-rose-600 shadow-xl transition-all active:scale-90"
               >
                 <X size={18} />
               </button>
@@ -151,14 +149,14 @@ const CreatePost = ({ onPostCreated, onClose }) => {
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               rows="3"
-              className="w-full bg-slate-50 border border-slate-50 rounded-2xl p-4 text-sm font-bold text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:bg-white focus:border-indigo-100 transition-all resize-none"
+              className="w-full bg-slate-50 border border-slate-50 rounded-2xl p-4 text-sm font-bold text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-4 focus:ring-rose-500/5 focus:bg-white focus:border-rose-100 transition-all resize-none"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading || (!caption && !imageFile)}
-            className="w-full flex items-center justify-center gap-2 py-4 bg-slate-900 hover:bg-indigo-600 disabled:opacity-30 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-slate-200 hover:shadow-indigo-100 transition-all active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2 py-4 bg-slate-900 hover:bg-rose-600 disabled:opacity-30 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-slate-200 hover:shadow-rose-100 transition-all active:scale-[0.98]"
           >
             {loading ? <Loader2 className="animate-spin" size={16} /> : 'Publish Post'}
           </button>

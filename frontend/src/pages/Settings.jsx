@@ -80,7 +80,7 @@ const Settings = () => {
                
                 <header className="mb-12">
                     <h1 className="text-4xl font-black italic uppercase tracking-tighter text-slate-900">
-                        Control Center<span className="text-indigo-600">.</span>
+                        Control Center<span className="text-rose-600">.</span>
                     </h1>
                   
                 </header>
@@ -88,7 +88,7 @@ const Settings = () => {
                 <div className="space-y-6">
                     <section className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
                         <div className="flex items-center gap-4 mb-10">
-                            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200 rotate-3">
+                            <div className="w-12 h-12 bg-rose-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-rse-200 rotate-3">
                                 <Shield size={24} className="-rotate-3" />
                             </div>
                             <div>
@@ -112,7 +112,7 @@ const Settings = () => {
                                 onClick={handleToggleEmail}
                                 disabled={isUpdating}
                                 className={`relative w-14 h-8 rounded-full transition-all duration-300 flex items-center px-1 ${
-                                    showEmail ? 'bg-indigo-600' : 'bg-slate-200'
+                                    showEmail ? 'bg-rose-600' : 'bg-slate-200'
                                 }`}
                             >
                                 <div className={`w-6 h-6 bg-white rounded-full shadow-lg transition-transform duration-300 flex items-center justify-center ${

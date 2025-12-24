@@ -43,13 +43,13 @@ const SidebarLink = ({ to, icon, label, active }) => (
   <Link
     to={to}
     className={`flex items-center gap-4 px-3 py-4 rounded-2xl transition-all group ${
-      active ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'
+      active ? 'bg-rose-50 text-rose-600' : 'text-slate-500 hover:bg-slate-50'
     }`}
   >
     <div className={`transition-all ${active ? 'scale-110' : 'group-hover:text-slate-900'}`}>
       {icon}
     </div>
-    <span className={`hidden lg:block text-[13px] font-bold tracking-tight ${active ? 'text-indigo-700' : ''}`}>
+    <span className={`hidden lg:block text-[13px] font-bold tracking-tight ${active ? 'text-rose-700' : ''}`}>
       {label}
     </span>
   </Link>

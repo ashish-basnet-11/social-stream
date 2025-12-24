@@ -91,7 +91,7 @@ const EditProfileModal = ({ profile, onClose, onUpdate }) => {
                                 />
                             </div>
                             
-                            <label className="absolute inset-0 flex flex-col items-center justify-center bg-indigo-600/80 rounded-[32px] opacity-0 group-hover:opacity-100 transition-all cursor-pointer text-white">
+                            <label className="absolute inset-0 flex flex-col items-center justify-center bg-rose-600/80 rounded-[32px] opacity-0 group-hover:opacity-100 transition-all cursor-pointer text-white">
                                 <Camera size={24} className="mb-1" />
                                 <span className="text-[10px] font-black uppercase tracking-widest">Change</span>
                                 <input type="file" hidden accept="image/*" onChange={handleFileSelect} />
@@ -111,7 +111,7 @@ const EditProfileModal = ({ profile, onClose, onUpdate }) => {
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 mt-1.5 outline-none focus:border-indigo-500/50 transition-all font-bold text-slate-700"
+                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 mt-1.5 outline-none focus:border-rose-500/50 transition-all font-bold text-slate-700"
                             />
                         </div>
 
@@ -121,7 +121,7 @@ const EditProfileModal = ({ profile, onClose, onUpdate }) => {
                                 value={bio}
                                 onChange={(e) => setBio(e.target.value)}
                                 rows="3"
-                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 mt-1.5 outline-none focus:border-indigo-500/50 transition-all font-medium text-slate-600 resize-none"
+                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 mt-1.5 outline-none focus:border-rose-500/50 transition-all font-medium text-slate-600 resize-none"
                             />
                         </div>
 

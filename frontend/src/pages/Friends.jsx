@@ -106,11 +106,11 @@ const Friends = () => {
       <header className="mb-10 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">
-            Network<span className="text-indigo-600">.</span>
+            Network<span className="text-rose-600">.</span>
           </h1>
           <p className="text-slate-500 font-medium text-sm">Manage your professional circle.</p>
         </div>
-        <div className="p-3 bg-white rounded-2xl border border-slate-200 shadow-sm text-indigo-600">
+        <div className="p-3 bg-white rounded-2xl border border-slate-200 shadow-sm text-rose-600">
           <Users size={24} />
         </div>
       </header>
@@ -124,13 +124,18 @@ const Friends = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 flex items-center justify-center gap-3 py-3 text-[11px] font-black uppercase tracking-widest rounded-[18px] transition-all ${activeTab === tab.id ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-400 hover:text-slate-600'
+            className={`flex-1 flex items-center justify-center gap-3 py-3 text-[11px] font-black uppercase tracking-widest rounded-[18px] transition-all ${activeTab === tab.id
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/30'
               }`}
           >
             <tab.icon size={14} />
             {tab.label}
             {tab.count > 0 && (
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-[9px] ${activeTab === tab.id ? 'bg-indigo-500' : 'bg-slate-100 text-slate-500'}`}>
+              <span className={`ml-1 px-2 py-0.5 rounded-full text-[9px] font-black ${activeTab === tab.id
+                  ? 'bg-rose-500 text-white' 
+                  : 'bg-rose-50 text-rose-600' 
+                }`}>
                 {tab.count}
               </span>
             )}
@@ -142,7 +147,7 @@ const Friends = () => {
       <div className="space-y-4">
         {loading ? (
           <div className="py-20 flex justify-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-indigo-600"></div>
+            <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-rose-600"></div>
           </div>
         ) : (
           <>
@@ -176,7 +181,7 @@ const Friends = () => {
                     action={
                       <button
                         onClick={() => handleAcceptRequest(req.id)}
-                        className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 shadow-md shadow-indigo-100"
+                        className="bg-rose-600 text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 shadow-md shadow-indigo-100"
                       >
                         Accept
                       </button>
@@ -205,7 +210,7 @@ const UserRow = ({ user, action, onActionClick }) => (
         {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center font-black text-slate-300 bg-slate-50 uppercase">{user.name[0]}</div>}
       </div>
       <div>
-        <p className="text-sm font-black text-slate-800 uppercase tracking-tight italic group-hover:text-indigo-600 transition-colors">{user.name}</p>
+        <p className="text-sm font-black text-slate-800 uppercase tracking-tight italic group-hover:text-rose-600 transition-colors">{user.name}</p>
       </div>
     </Link>
 

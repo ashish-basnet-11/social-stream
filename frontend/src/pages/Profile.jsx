@@ -136,7 +136,7 @@ const Profile = () => {
             <div className="flex flex-col md:flex-row items-center gap-6">
               <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">
                 {profile?.name}
-                <span className="text-indigo-600">.</span>
+                <span className="text-rose-600">.</span>
               </h1>
 
               <div className="flex items-center gap-3">
@@ -177,7 +177,7 @@ const Profile = () => {
               {profile?.email && (
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                   <div className="flex items-center gap-3 px-4 py-2 bg-white border border-slate-200 rounded-2xl shadow-sm group hover:border-indigo-200 transition-all">
-                    <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-indigo-600 group-hover:bg-indigo-50 transition-colors">
+                    <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-rose-600 group-hover:bg-indigo-50 transition-colors">
                       <Mail size={16} />
                     </div>
                     <div className="text-left">
@@ -221,7 +221,7 @@ const Profile = () => {
                     Friends with{' '}
                     <span
                       onClick={() => navigate(`/profile/${profile.mutualFriends[0].id}`)}
-                      className="text-indigo-600 cursor-pointer hover:underline decoration-2 underline-offset-2"
+                      className="text-rose-600 cursor-pointer hover:underline decoration-2 underline-offset-2"
                     >
                       {profile.mutualFriends[0].name}
                     </span>

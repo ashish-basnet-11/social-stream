@@ -61,11 +61,11 @@ const Login = () => {
           <div>
             {/* BRANDING MATCHED TO SIDEBAR */}
             <div className="flex items-center gap-2">
-              <div className="h-10 w-10 bg-indigo-600 rounded-xl rotate-3 flex items-center justify-center shadow-lg shadow-indigo-200 shrink-0">
+              <div className="h-10 w-10 bg-rose-600 rounded-xl rotate-3 flex items-center justify-center shadow-lg shadow-indigo-200 shrink-0">
                 <span className="text-white font-black text-xl -rotate-3">S</span>
               </div>
               <h1 className="text-xl font-black text-slate-800 tracking-tighter uppercase italic">
-                Stream<span className="text-indigo-600">.</span>
+                Stream<span className="text-rose-600">.</span>
               </h1>
             </div>
           </div>
@@ -73,7 +73,7 @@ const Login = () => {
           <div className="relative z-10">
             <h2 className="text-5xl font-black text-slate-900 mb-6 tracking-tighter leading-[1.1]">
               Connect with <br />
-              <span className="text-indigo-600">the network.</span>
+              <span className="text-rose-600">the network.</span>
             </h2>
             <div className="w-full flex flex-col items-center">
               <img
@@ -124,7 +124,7 @@ const Login = () => {
                     name="email"
                     type="email"
                     required
-                    className="w-full px-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all sm:text-sm"
+                    className="w-full px-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder-slate-300 focus:outline-none focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500 transition-all sm:text-sm"
                     placeholder="example@gmail.com"
                     value={formData.email}
                     onChange={handleChange}
@@ -137,7 +137,7 @@ const Login = () => {
                     </label>
                     <Link
                       to="/forgot-password"
-                      className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline"
+                      className="text-[10px] font-black text-rose-600 uppercase tracking-widest hover:underline"
                     >
                       Forgot Password?
                     </Link>
@@ -146,7 +146,7 @@ const Login = () => {
                     name="password"
                     type="password"
                     required
-                    className="w-full px-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all sm:text-sm"
+                    className="w-full px-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder-slate-300 focus:outline-none focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500 transition-all sm:text-sm"
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleChange}
@@ -187,7 +187,7 @@ const Login = () => {
 
               <p className="mt-8 text-center text-xs font-bold text-slate-500 uppercase tracking-tight">
                 New to the platform?{' '}
-                <Link to="/register" className="text-indigo-600 hover:underline">
+                <Link to="/register" className="text-rose-600 hover:underline">
                   Create Account
                 </Link>
               </p>

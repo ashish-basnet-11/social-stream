@@ -67,12 +67,12 @@ const Home = () => {
       <div className="max-w-[680px] w-full space-y-8">
         <header className="flex items-end justify-between mb-4 px-2">
           <div>
-            <div className="flex items-center gap-2 text-indigo-600 mb-1">
+            <div className="flex items-center gap-2 text-rose-600 mb-1">
               <Sparkles size={16} />
               <span className="text-[10px] font-black uppercase tracking-widest">Discovery</span>
             </div>
             <h2 className="text-3xl font-black text-slate-900 tracking-tighter italic">
-              Recent Activity<span className="text-indigo-600">.</span>
+              Recent Activity<span className="text-rose-600">.</span>
             </h2>
           </div>
           
@@ -95,7 +95,7 @@ const Home = () => {
         {/* Updated Discovery Card */}
         <div className="bg-white rounded-[32px] p-8 border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
           <div className="flex items-center gap-2 mb-6 text-slate-800">
-            <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+            <div className="p-2 bg-indigo-50 rounded-lg text-rose-600">
               <Zap size={18} fill="currentColor" />
             </div>
             <h3 className="font-black uppercase tracking-tighter text-sm italic">New Discoveries</h3>
@@ -145,7 +145,7 @@ const Home = () => {
             )}
           </div>
           
-          <button className="w-full mt-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-indigo-600 border-t border-slate-50 transition-colors">
+          <button className="w-full mt-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-rose-600 border-t border-slate-50 transition-colors">
             Expand Discovery
           </button>
         </div>
@@ -159,7 +159,7 @@ const Home = () => {
             </div>
             <div className="flex flex-wrap gap-2">
               {['#design', '#stream', '#dev', '#studio'].map(tag => (
-                <span key={tag} className="px-3 py-1 bg-white border border-slate-100 rounded-full text-[10px] font-bold text-slate-500 hover:border-indigo-200 hover:text-indigo-600 cursor-pointer transition-all">
+                <span key={tag} className="px-3 py-1 bg-white border border-slate-100 rounded-full text-[10px] font-bold text-slate-500 hover:border-rose-200 hover:text-rose-600 cursor-pointer transition-all">
                   {tag}
                 </span>
               ))}

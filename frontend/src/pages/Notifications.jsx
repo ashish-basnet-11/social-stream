@@ -120,12 +120,12 @@ const Notifications = () => {
             <header className="mb-10 flex items-center justify-between">
                 <div>
                     {/* Optional: Keeping the small "Inbox" tag but styled like a subtitle or removing it for total consistency */}
-                    <div className="flex items-center gap-2 text-indigo-600 mb-1">
+                    <div className="flex items-center gap-2 text-rose-600 mb-1">
                         <Inbox size={14} strokeWidth={3} />
                         <span className="text-[10px] font-black uppercase tracking-widest">Inbox</span>
                     </div>
                     <h1 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase">
-                        Activity Hub<span className="text-indigo-600">.</span>
+                        Activity Hub<span className="text-rose-600">.</span>
                     </h1>
                     <p className="text-slate-500 font-medium">Stay updated with your latest interactions.</p>
                 </div>
