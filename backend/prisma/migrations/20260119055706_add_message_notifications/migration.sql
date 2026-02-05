@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `Notification` ADD COLUMN `conversationId` INTEGER NULL,
+    MODIFY `type` ENUM('LIKE', 'COMMENT', 'FRIEND_REQUEST', 'FRIEND_ACCEPT', 'MESSAGE') NOT NULL;

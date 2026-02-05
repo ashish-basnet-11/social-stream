@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { usersAPI, friendsAPI, postsAPI } from '../services/api';
+import { usersAPI, friendsAPI, postsAPI, chatAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import EditProfileModal from '../components/EditProfileModal';
 import PostCard from '../components/PostCard';
@@ -89,6 +89,15 @@ const Profile = () => {
     }
   };
 
+  const handleMessage = async () => {
+    try {
+      const response = await chatAPI.getOrCreateConversation(parseInt(userId));
+      navigate(`/chats/${response.data.id}`);
+    } catch (err) {
+      console.error('Failed to create conversation:', err);
+    }
+  };
+
   if (loading) return (
     <div className="flex-1 flex items-center justify-center min-h-screen bg-[#F8FAFC]">
       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-600"></div>
@@ -148,11 +157,21 @@ const Profile = () => {
                     <Settings size={16} /> Update Profile
                   </button>
                 ) : (
-                  <FriendshipButton
-                    status={profile?.friendshipStatus}
-                    onClick={handleFriendAction}
-                    loading={friendLoading}
-                  />
+                  <>
+                    <FriendshipButton
+                      status={profile?.friendshipStatus}
+                      onClick={handleFriendAction}
+                      loading={friendLoading}
+                    />
+                    {profile?.friendshipStatus === 'friends' && (
+                      <button
+                        onClick={handleMessage}
+                        className="bg-rose-600 hover:bg-rose-700 text-white px-5 py-2 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2"
+                      >
+                        <MessageCircle size={16} /> Message
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>

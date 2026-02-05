@@ -1,6 +1,7 @@
 // src/context/AuthContext.jsx
 import { createContext, useState, useEffect, useContext } from 'react';
 import { authAPI } from '../services/api';
+import { initializeSocket, disconnectSocket } from '../services/socket';
 
 const AuthContext = createContext();
 
@@ -33,20 +34,37 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Initialize Socket.IO when user is authenticated
+  useEffect(() => {
+    if (user) {
+      // Get token from cookies or localStorage if needed
+      const token = 'authenticated'; // You can enhance this with actual JWT token
+      initializeSocket(user.id, token);
+    } else {
+      disconnectSocket();
+    }
+
+    return () => {
+      if (!user) {
+        disconnectSocket();
+      }
+    };
+  }, [user]);
+
   const register = async (userData) => {
     try {
       setError(null);
       const response = await authAPI.register(userData);
-      
+
       // Check if verification is required
       if (response.data.data.requiresVerification) {
-        return { 
-          success: true, 
+        return {
+          success: true,
           requiresVerification: true,
-          email: response.data.data.email 
+          email: response.data.data.email
         };
       }
-      
+
       setUser(response.data.data.user);
       return { success: true };
     } catch (error) {
@@ -66,10 +84,10 @@ export const AuthProvider = ({ children }) => {
       const errorMsg = error.response?.data?.error || 'Login failed';
       const requiresVerification = error.response?.data?.requiresVerification || false;
       setError(errorMsg);
-      return { 
-        success: false, 
+      return {
+        success: false,
         error: errorMsg,
-        requiresVerification 
+        requiresVerification
       };
     }
   };

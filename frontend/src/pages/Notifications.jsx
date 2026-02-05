@@ -3,13 +3,14 @@ import { useNotifications } from '../hooks/useNotifications';
 import { notificationsAPI, friendsAPI } from '../services/api';
 import {
     Heart, MessageSquare, UserPlus, CheckCircle2,
-    Inbox, Trash2, Check, X, BellDot, AlertCircle
+    Inbox, Trash2, Check, X, BellDot, AlertCircle, MessageCircle
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Notifications = () => {
     const { notifications, unreadCount, refresh } = useNotifications();
     const [filter, setFilter] = useState('all');
+    const navigate = useNavigate();
 
     // Confirmation States
     const [showConfirm, setShowConfirm] = useState(false);
@@ -73,12 +74,24 @@ const Notifications = () => {
         } catch (err) { console.error(`Failed to ${action} request`, err); }
     };
 
+    const handleNotificationClick = (notif) => {
+        handleMarkOneRead(notif.id, notif.isRead);
+
+        // Navigate based on notification type
+        if (notif.type === 'MESSAGE' && notif.conversationId) {
+            navigate(`/chats/${notif.conversationId}`);
+        } else if (notif.postId) {
+            navigate(`/post/${notif.postId}`);
+        }
+    };
+
     const getNotifConfig = (type) => {
         const configs = {
             LIKE: { icon: <Heart size={14} className="fill-rose-500 text-rose-500" />, text: "liked your post", bg: "bg-rose-50" },
             COMMENT: { icon: <MessageSquare size={14} className="fill-indigo-500 text-indigo-500" />, text: "commented on your post", bg: "bg-indigo-50" },
             FRIEND_REQUEST: { icon: <UserPlus size={14} className="text-amber-500" />, text: "sent you a friend request", bg: "bg-amber-50" },
             FRIEND_ACCEPT: { icon: <CheckCircle2 size={14} className="text-emerald-500" />, text: "accepted your friend request", bg: "bg-emerald-50" },
+            MESSAGE: { icon: <MessageCircle size={14} className="fill-rose-600 text-rose-600" />, text: "sent you a message", bg: "bg-rose-50" },
         };
         return configs[type] || configs.LIKE;
     };
@@ -189,8 +202,8 @@ const Notifications = () => {
                         return (
                             <div
                                 key={notif.id}
-                                onClick={() => handleMarkOneRead(notif.id, notif.isRead)}
-                                className={`group relative flex flex-col p-5 rounded-[28px] border transition-all hover:shadow-xl ${!notif.isRead
+                                onClick={() => handleNotificationClick(notif)}
+                                className={`group relative flex flex-col p-5 rounded-[28px] border transition-all hover:shadow-xl cursor-pointer ${!notif.isRead
                                     ? 'bg-white border-indigo-100 shadow-md ring-1 ring-indigo-50'
                                     : 'bg-slate-50/50 border-transparent opacity-80'
                                     }`}
@@ -221,6 +234,16 @@ const Notifications = () => {
                                         {notif.postId && (
                                             <Link to={`/post/${notif.postId}`} className="p-2 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
                                                 View
+                                            </Link>
+                                        )}
+
+                                        {notif.type === 'MESSAGE' && notif.conversationId && (
+                                            <Link
+                                                to={`/chats/${notif.conversationId}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="p-2 text-[9px] font-black uppercase tracking-widest text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-all"
+                                            >
+                                                View Chat
                                             </Link>
                                         )}
 

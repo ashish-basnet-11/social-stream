@@ -60,7 +60,7 @@ export const usersAPI = {
   }),
   getUserProfile: (userId) => api.get(`/users/${userId}`),
   searchUsers: (query) => api.get(`/users/search?query=${query}`),
-  
+
   getSuggestions: () => api.get('/users/suggestions'),
 };
 
@@ -69,7 +69,7 @@ export const friendsAPI = {
   // Note: updated the name to 'sendRequest' to match your Home.jsx usage 
   // or you can change Home.jsx to use friendsAPI.sendRequest
   sendRequest: (receiverId) => api.post('/friends/request', { receiverId }),
-  
+
   acceptRequest: (requestId) => api.put(`/friends/request/${requestId}/accept`),
   rejectRequest: (requestId) => api.put(`/friends/request/${requestId}/reject`),
   cancelRequest: (requestId) => api.delete(`/friends/request/${requestId}`),
@@ -89,6 +89,20 @@ export const notificationsAPI = {
   markAllRead: () => api.put('/notifications/read'),
   markOneRead: (id) => api.put(`/notifications/${id}/read`),
   deleteOne: (id) => api.delete(`/notifications/${id}`),
+};
+
+// Chat endpoints
+export const chatAPI = {
+  getConversations: () => api.get('/chats/conversations'),
+  getOrCreateConversation: (otherUserId) => api.post('/chats/conversations', { otherUserId }),
+  getMessages: (conversationId, page = 1, limit = 50) =>
+    api.get(`/chats/conversations/${conversationId}/messages?page=${page}&limit=${limit}`),
+  sendMessage: (conversationId, content) =>
+    api.post(`/chats/conversations/${conversationId}/messages`, { content }),
+  markAsRead: (conversationId) =>
+    api.put(`/chats/conversations/${conversationId}/read`),
+  deleteMessage: (messageId) =>
+    api.delete(`/chats/messages/${messageId}`),
 };
 
 

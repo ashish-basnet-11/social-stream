@@ -1,9 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useNotifications } from '../hooks/useNotifications';
-import { LayoutGrid, Users, User, Bell } from 'lucide-react';
+import { useChat } from '../hooks/useChat';
+import { LayoutGrid, Users, User, Bell, MessageCircle } from 'lucide-react';
 
 const Sidebar = () => {
   const { unreadCount } = useNotifications();
+  const { totalUnreadCount } = useChat();
   const location = useLocation();
 
   return (
@@ -28,6 +30,18 @@ const Sidebar = () => {
           )}
         </div>
 
+        <div className="relative">
+          <SidebarLink
+            to="/chats"
+            icon={<MessageCircle size={20} />}
+            label="Chats"
+            active={location.pathname.startsWith('/chats')}
+          />
+          {totalUnreadCount > 0 && (
+            <span className="absolute top-3 left-8 lg:left-10 h-2 w-2 bg-rose-500 rounded-full ring-4 ring-white" />
+          )}
+        </div>
+
         <SidebarLink
           to="/friends"
           icon={<Users size={20} />}
@@ -42,9 +56,8 @@ const Sidebar = () => {
 const SidebarLink = ({ to, icon, label, active }) => (
   <Link
     to={to}
-    className={`flex items-center gap-4 px-3 py-4 rounded-2xl transition-all group ${
-      active ? 'bg-rose-50 text-rose-600' : 'text-slate-500 hover:bg-slate-50'
-    }`}
+    className={`flex items-center gap-4 px-3 py-4 rounded-2xl transition-all group ${active ? 'bg-rose-50 text-rose-600' : 'text-slate-500 hover:bg-slate-50'
+      }`}
   >
     <div className={`transition-all ${active ? 'scale-110' : 'group-hover:text-slate-900'}`}>
       {icon}

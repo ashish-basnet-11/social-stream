@@ -5,7 +5,7 @@ import {
     registerSchema,
     loginSchema,
     forgotPasswordSchema,
-    resetPasswordSchema   
+    resetPasswordSchema
 }
     from "../validators/authValidators.js";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/emailService.js";
@@ -21,12 +21,18 @@ const register = async (req, res) => {
         const validatedData = registerSchema.parse(req.body);
         const { name, email, password } = validatedData;
 
-        const userExists = await prisma.user.findUnique({
-            where: { email }
-        });
+        // Check if user exists in main User table or PendingUser table
+        const userExists = await prisma.user.findUnique({ where: { email } });
+        const pendingUserExists = await prisma.pendingUser.findUnique({ where: { email } });
 
         if (userExists) {
             return res.status(400).json({ error: "User already exists" });
+        }
+
+        // If pending user exists, we can overwrite it or tell them to check email. 
+        // Overwriting is cleaner if they lost the code.
+        if (pendingUserExists) {
+            await prisma.pendingUser.delete({ where: { email } });
         }
 
         // Hash password
@@ -37,13 +43,12 @@ const register = async (req, res) => {
         const verificationCode = generateVerificationCode();
         const verificationExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-        // Create user (unverified)
-        const user = await prisma.user.create({
+        // Create pending user
+        const pendingUser = await prisma.pendingUser.create({
             data: {
                 name,
                 email,
                 password: hashedPassword,
-                isVerified: false,
                 verificationCode,
                 verificationExpiry,
             }
@@ -54,8 +59,8 @@ const register = async (req, res) => {
             await sendVerificationEmail(email, verificationCode);
         } catch (emailError) {
             console.error("Email sending failed:", emailError);
-            // Delete user if email fails
-            await prisma.user.delete({ where: { id: user.id } });
+            // Delete pending user if email fails
+            await prisma.pendingUser.delete({ where: { id: pendingUser.id } });
             return res.status(500).json({
                 error: "Failed to send verification email. Please try again."
             });
@@ -65,8 +70,7 @@ const register = async (req, res) => {
             status: "success",
             message: "Registration successful! Please check your email for verification code.",
             data: {
-                userId: user.id,
-                email: user.email,
+                email: pendingUser.email,
                 requiresVerification: true
             }
         });
@@ -94,36 +98,41 @@ const verifyEmail = async (req, res) => {
             return res.status(400).json({ error: "Email and code are required" });
         }
 
-        const user = await prisma.user.findUnique({
+        // Look for user in PendingUser table
+        const pendingUser = await prisma.pendingUser.findUnique({
             where: { email }
         });
 
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        if (user.isVerified) {
-            return res.status(400).json({ error: "Email already verified" });
+        if (!pendingUser) {
+            // Check if they are already verified in User table
+            const existingUser = await prisma.user.findUnique({ where: { email } });
+            if (existingUser) {
+                return res.status(400).json({ error: "Email already verified" });
+            }
+            return res.status(404).json({ error: "Registration request not found" });
         }
 
         // Check if code matches and hasn't expired
-        if (user.verificationCode !== code) {
+        if (pendingUser.verificationCode !== code) {
             return res.status(400).json({ error: "Invalid verification code" });
         }
 
-        if (new Date() > user.verificationExpiry) {
+        if (new Date() > pendingUser.verificationExpiry) {
             return res.status(400).json({ error: "Verification code has expired" });
         }
 
-        // Verify user
-        await prisma.user.update({
-            where: { id: user.id },
+        // Move to main User table
+        const user = await prisma.user.create({
             data: {
+                name: pendingUser.name,
+                email: pendingUser.email,
+                password: pendingUser.password, // Already hashed
                 isVerified: true,
-                verificationCode: null,
-                verificationExpiry: null,
             }
         });
+
+        // Delete from pending
+        await prisma.pendingUser.delete({ where: { id: pendingUser.id } });
 
         // Generate token and log them in
         const token = generateToken(user.id, res);
@@ -155,24 +164,26 @@ const resendVerificationCode = async (req, res) => {
             return res.status(400).json({ error: "Email is required" });
         }
 
-        const user = await prisma.user.findUnique({
+        // Check PendingUser first
+        const pendingUser = await prisma.pendingUser.findUnique({
             where: { email }
         });
 
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        if (user.isVerified) {
-            return res.status(400).json({ error: "Email already verified" });
+        if (!pendingUser) {
+            // Check if already verified
+            const user = await prisma.user.findUnique({ where: { email } });
+            if (user) {
+                return res.status(400).json({ error: "Email already verified" });
+            }
+            return res.status(404).json({ error: "Registration not found" });
         }
 
         // Generate new code
         const verificationCode = generateVerificationCode();
         const verificationExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
-        await prisma.user.update({
-            where: { id: user.id },
+        await prisma.pendingUser.update({
+            where: { id: pendingUser.id },
             data: {
                 verificationCode,
                 verificationExpiry,

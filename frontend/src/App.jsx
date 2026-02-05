@@ -11,6 +11,7 @@ import Friends from './pages/Friends';
 import ForgotPassword from './pages/ForgotPassword';
 import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
+import Chats from './pages/Chats';
 
 function App() {
   return (
@@ -28,6 +29,8 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Home />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/chats" element={<Chats />} />
+            <Route path="/chats/:conversationId" element={<Chats />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/settings" element={<Settings />} />

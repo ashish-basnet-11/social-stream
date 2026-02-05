@@ -7,6 +7,8 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import session from 'express-session';
 import passport from './config/passport.js';
+import { Server } from 'socket.io';
+import http from 'http';
 
 // Import routes
 import postsRoutes from './routes/postsRoutes.js';
@@ -18,11 +20,13 @@ import userRoutes from './routes/userRoutes.js';
 import friendRoutes from './routes/friendRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js'
 import notificationRoutes from "./routes/notificationRoutes.js";
+import chatRoutes from './routes/chatRoutes.js';
 
 config();
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
 
 // Security middleware
 app.use(helmet());
@@ -90,6 +94,7 @@ app.use("/api/likes", likeRoutes);
 app.use("/api/comments", commentRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/chats", chatRoutes);
 
 // Health check route
 app.get("/api/health", (req, res) => {
@@ -101,9 +106,73 @@ app.use((req, res) => {
     res.status(404).json({ error: "Route not found" });
 });
 
+// Initialize Socket.IO
+const io = new Server(server, {
+    cors: {
+        origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+        credentials: true
+    }
+});
+
+// Store io instance in app for use in controllers
+app.set('io', io);
+
+// Socket.IO authentication middleware
+io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+        return next(new Error('Authentication error'));
+    }
+    // You can add JWT verification here if needed
+    // For now, we'll trust the token from the client
+    socket.userId = socket.handshake.auth.userId;
+    next();
+});
+
+// Socket.IO connection handler
+io.on('connection', (socket) => {
+    console.log(`User connected: ${socket.userId}`);
+
+    // Join conversation room
+    socket.on('join_conversation', (conversationId) => {
+        socket.join(`conversation_${conversationId}`);
+        console.log(`User ${socket.userId} joined conversation ${conversationId}`);
+    });
+
+    // Leave conversation room
+    socket.on('leave_conversation', (conversationId) => {
+        socket.leave(`conversation_${conversationId}`);
+        console.log(`User ${socket.userId} left conversation ${conversationId}`);
+    });
+
+    // Typing indicator
+    socket.on('typing', ({ conversationId, isTyping }) => {
+        socket.to(`conversation_${conversationId}`).emit('user_typing', {
+            userId: socket.userId,
+            isTyping
+        });
+    });
+
+    // User online status
+    socket.on('user_online', () => {
+        socket.broadcast.emit('user_status', {
+            userId: socket.userId,
+            online: true
+        });
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`User disconnected: ${socket.userId}`);
+        socket.broadcast.emit('user_status', {
+            userId: socket.userId,
+            online: false
+        });
+    });
+});
+
 const PORT = process.env.PORT || 5001;
 
-const server = app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
 });
 
